@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "460132345365",
+    "firebase_url": "https://kclaim-82a51.firebaseio.com",
+    "project_id": "kclaim-82a51",
+    "storage_bucket": "kclaim-82a51.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:460132345365:android:a59cc886e0cacb14",
+        "android_client_info": {
+          "package_name": "com.example.kclaim"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "460132345365-3disj1jbvhr7rhuisc2krru7i4nuspqf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7qgDBtfvxXqCcmkXoJEq2GdwiM62NXuc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
