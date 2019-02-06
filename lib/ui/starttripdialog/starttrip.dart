@@ -26,61 +26,54 @@ class AddNewTripDialogState extends State<TripDialog> {
   }
 
   Widget build(BuildContext context) {
-    return new SimpleDialog(
-      title: Text("Trip Starter"),
-      contentPadding: const EdgeInsets.all(10.0),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Column(
-          children: <Widget>[
-            new ListTile(
-              leading: const Icon(Icons.person),
-              title: new TextField(
-                controller: txtTripNameController,
-                onChanged: (v) => txtTripNameController.text = v,
-                decoration: new InputDecoration(
-                  hintText: "Name",
-                ),
-              ),
+        new ListTile(
+          leading: const Icon(Icons.person),
+          title: new TextField(
+            controller: txtTripNameController,
+            onChanged: (v) => txtTripNameController.text = v,
+            decoration: new InputDecoration(
+              hintText: "Name",
             ),
-            ListTile(
-                leading: const Icon(Icons.calendar_today),
-                title: Text("${DateFormat('yyyy-MM-dd').format(selectedDate)}"),
-                onTap: () {
-                  _selectDate(context);
-                }),
-            new Row /*or Column*/ (
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                new IconButton(
-                  icon: new Icon(Icons.done),
-                  color: Colors.orange,
-                  tooltip: 'Choose date',
-                  onPressed: (() {
-                    Firestore.instance
-                        .runTransaction((Transaction transaction) async {
+          ),
+        ),
+        ListTile(
+            leading: const Icon(Icons.calendar_today),
+            title: Text("${DateFormat('yyyy-MM-dd').format(selectedDate)}"),
+            onTap: () {
+              _selectDate(context);
+            }),
+        new Row /*or Column*/ (
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            new IconButton(
+              icon: new Icon(Icons.done),
+              color: Colors.orange,
+              tooltip: 'Choose date',
+              onPressed: (() {
+                Firestore.instance
+                    .runTransaction((Transaction transaction) async {
+                  CollectionReference reference = Firestore.instance
+                      .document('users/User1')
+                      .collection('Trips');
 
-                      CollectionReference reference =
-                          Firestore.instance.document('users/User1').collection('Trips');
-
-                      await reference.add({
-                        "Tripname": txtTripNameController.text,
-                        "TripStartDate": selectedDate,
-                      });
-                      txtTripNameController.clear();
-                    });
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => TripScreen()),
-                    );
-                  }),
-                ),
-              ],
+                  await reference.add({
+                    "Tripname": txtTripNameController.text,
+                    "TripStartDate": selectedDate,
+                  });
+                  txtTripNameController.clear();
+                });
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TripScreen()),
+                );
+              }),
             ),
           ],
-        )
+        ),
       ],
     );
   }
 }
-
-

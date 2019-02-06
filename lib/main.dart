@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kclaim/ui/homecardview/homecard.dart';
+import 'package:kclaim/bottom_sheet_fix.dart';
+import 'package:kclaim/ui/starttripdialog/starttrip.dart';
+import 'package:kclaim/ui/tripview/tripview.dart';
 
 void main() => runApp(MyApp());
 
@@ -10,9 +12,26 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.orange,
+        // primarySwatch:  Colors.red,
+        primaryColor: Colors.red.shade800,
+        primaryColorDark: Colors.red.shade900,
+        primaryColorLight: Colors.red.shade700,
+        brightness: Brightness.light,
+        // buttonColor: Colors.red.shade900,
+        iconTheme: new IconThemeData(
+            color: Colors.deepOrangeAccent[700],
+            opacity: 1.0,
+            //size: 50.0
+        ),
+        accentColor: Colors.red,
+        fontFamily: 'Montserrat',
+        textTheme: TextTheme(
+          headline: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
+          title: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
+          body1: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
+        ),
       ),
-      home: MyHomePage(title: 'Kmart buisness trip claim.'),
+      home: TripScreen(), //(title: 'Kmart buisness trip claim.'),
     );
   }
 }
@@ -27,38 +46,38 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
   void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+    // showModalBottomSheet<void>(
+    //   context: context,
+    //   builder: (BuildContext context) {
+    //     return addtrip();
+    //   },
+    // );
+
+    showModalBottomSheetApp(
+        context: context,
+        builder: (builder) {
+          return addtrip();
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-    var textTheme = theme.textTheme;
-    var followerStyle =
-        textTheme.subhead.copyWith(color: Colors.black);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-          child: Container(
-              padding: const EdgeInsets.all(8.0),
-              height: 500,
-              child: Center(
-                  child: new Column(
-                children: <Widget>[
-                  new HomeCardnNewTrip(),
-                  new HomeCardnEditTrip(),
-                ],
-              )))),
+      body: Center(child: Container(child: Center(child: TripScreen()))),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment Counter',
+        child: Icon(Icons.add),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
+
+  Widget addtrip() {
+    return new TripDialog();
+  }
 }
-
-

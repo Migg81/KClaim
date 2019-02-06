@@ -8,28 +8,30 @@ import 'dart:async';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
- 
+
 import 'package:path_provider/path_provider.dart';
- 
+
 class MyTripDocWidget extends StatefulWidget {
   final String tripId;
   MyTripDocWidget({Key key, this.tripId}) : super(key: key);
- 
+
   @override
   _MyTripDocWidgettState createState() => _MyTripDocWidgettState();
 }
- 
+
 class _MyTripDocWidgettState extends State<MyTripDocWidget> {
   File sampleImage;
- 
+  int totalcost;
+  int count = 0;
+
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
     var textTheme = theme.textTheme;
     var followerStyle = textTheme.subhead.copyWith(color: Colors.black);
- 
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.tripId}'),
+        title: Text('Trip Doc'),
       ),
       body: Center(
         child: new Column(children: <Widget>[
@@ -52,7 +54,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                   decoration: new BoxDecoration(
                     border: new Border.all(color: Colors.white30),
                     borderRadius: new BorderRadius.circular(30.0),
-                 ),
+                  ),
                   child: _createPillButton(
                     'FOLLOW',
                     '${widget.tripId}',
@@ -92,7 +94,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
- 
+
   _buildlistitem(BuildContext context, DocumentSnapshot document) {
     return Card(
         elevation: 1.7,
@@ -100,7 +102,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
           child: cardRowDecor(context, document),
         ));
   }
- 
+
   Widget planetThumbnail(BuildContext context, DocumentSnapshot document) {
     return new Container(
       margin: new EdgeInsets.symmetric(vertical: 16.0),
@@ -113,7 +115,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
       ),
     );
   }
- 
+
   Widget cardRowDecor(BuildContext context, DocumentSnapshot document) {
     return new Container(
         // height: 180.0,
@@ -128,7 +130,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
           ],
         ));
   }
- 
+
   Widget _createPillButton(
     String text,
     String tripId, {
@@ -150,49 +152,47 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
           } else if (text == 'FOLLOW') {
             //_uploadCSVToFireStore(file);
           }
-          // final Email email = Email(
-          //   body: 'Email body',
-          //   subject: 'Email subject',
-          //   recipients: ['samiran.majumder@gmail.com'],
-          //   attachmentPath: file.path,
-          // );
- 
-          // await FlutterEmailSender.send(email);
         },
         child: new Text(text),
       ),
     );
   }
- 
+
   Future getImage() async {
     var tempImage = await ImagePicker.pickImage(source: ImageSource.gallery);
     setState(() {
       sampleImage = tempImage;
     });
   }
- 
+
   _calculatingtravelCost(TextStyle costStyle, String tripId) {
     int cost = 0;
+    int kount = 0;
     Firestore.instance
         .collection("/users/User1/Trips/$tripId/TropDocs")
         .snapshots()
         .listen((snapshot) {
       snapshot.documents.forEach((doc) {
         cost = (cost + int.parse(doc.data["Amount"]));
+        kount=kount +1;
+        setState(() {
+          totalcost = cost;
+          count = kount;
+        });
       });
     });
- 
+
     return (<Widget>[
-      new Text('$cost  Totalcost', style: costStyle),
+      new Text('Totalcost $totalcost', style: costStyle),
       new Text(
         ' | ',
         style:
             costStyle.copyWith(fontSize: 24.0, fontWeight: FontWeight.normal),
       ),
-      new Text('100 Followers', style: costStyle),
+      new Text('No of Documnet $count ', style: costStyle),
     ]);
   }
- 
+
   _pepairingCSVData(String tripId) async {
     String data =
         'Date,Expense Category,Travel Location,Expense Nature,Account,Description,Receipt No,' +
@@ -230,14 +230,14 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
             '' +
             ',' +
             '';
- 
-        await _creteLocalocalFile('\r\n'+data, 'APPEND');
+
+        await _creteLocalocalFile('\r\n' + data, 'APPEND');
       });
     });
- 
+
     //return localCSV;
   }
- 
+
   _uploadCSVToFireStore() async {
     final path = await _localPath;
     final documentFilename =
@@ -245,15 +245,15 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
     final StorageReference ref =
         FirebaseStorage.instance.ref().child('$documentFilename');
     final StorageUploadTask uploadTask = ref.putFile(new File(path));
- 
+
     final downloadURL =
         await (await uploadTask.onComplete).ref.getDownloadURL();
- 
+
     if (uploadTask.isComplete) {
       _emailCSV(downloadURL);
     }
   }
- 
+
   _emailCSV(String filelocation) async {
     String url =
         'mailto:smith@example.org?subject=News&body=$filelocation%20plugin';
@@ -263,57 +263,36 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
       throw 'Could not launch $url';
     }
   }
- 
+
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
- 
+
     final path = directory.path;
- 
+
     return '$path/counter.csv';
   }
- 
+
   Future<File> _creteLocalocalFile(String content, String filemode) async {
     final path = await _localPath;
     File localFile = File(path);
- 
+
     if (filemode == 'START') {
       localFile.writeAsStringSync(content);
     } else {
       localFile.writeAsStringSync(content, mode: FileMode.append);
     }
-    //await localFile.writeAsString(content);
     return localFile;
   }
- 
+
   Widget travelDocCard(BuildContext context, DocumentSnapshot document) {
     return new Container(
       child: Column(
         children: <Widget>[
-          // new Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //   children: <Widget>[
-          //     Icon(Icons.category),
-          //     Text(
-          //       document['ExpenseType'],
-          //       style: TextStyle(color: Colors.white.withOpacity(1.0)),
-          //     ),
-          //     Icon(Icons.attach_money),
-          //     Text(
-          //       document['Amount'],
-          //       style: TextStyle(color: Colors.white.withOpacity(1.0)),
-          //     ),
-          //   ],
-          // ),
           ListTile(
             title: Text(
               document['ExpenseCategory'],
               style: TextStyle(color: Colors.white.withOpacity(1.0)),
             ),
-            // subtitle: document['DocumentDate'] == null
-            //     ? Text("No record found",
-            //         style: TextStyle(color: Colors.white.withOpacity(1.0)))
-            //     : Text(document['DocumentDate'],
-            //         style: TextStyle(color: Colors.white.withOpacity(1.0))),
           ),
           new Padding(
               padding: new EdgeInsets.all(7.0),
@@ -358,7 +337,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                         style: new TextStyle(fontSize: 18.0)),
                   )
                 ],
-             ))
+              ))
         ],
       ),
       height: 180.0,
@@ -378,5 +357,3 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
     );
   }
 }
- 
- 

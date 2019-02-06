@@ -2,7 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kclaim/ui/tripdocumnet/tripdocs.dart';
 
-class TripScreen extends StatelessWidget {
+
+class TripScreen extends StatefulWidget {
+  TripScreen({Key key, this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  _TripScreenState createState() => _TripScreenState();
+}
+
+class _TripScreenState extends State<TripScreen> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,6 +35,7 @@ class TripScreen extends StatelessWidget {
                 _buildlistitem(context, snapshot.data.documents[index]),
           );
         },
+        
       )),
     );
   }
@@ -90,7 +102,7 @@ class TripScreen extends StatelessWidget {
     ),
   );
 
-  
+
   Widget cardRowDecor(BuildContext context, DocumentSnapshot document) {
     return new Container(
         // height: 180.0,

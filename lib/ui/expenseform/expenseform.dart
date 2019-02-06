@@ -105,22 +105,25 @@ class _ExpensePage extends State<Expenseform> {
                       icon: const Icon(Icons.attach_money),
                     ),
                   ),
-                  new Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      new Radio(
-                        value: "Card",
-                        groupValue: paymentmethodType,
-                        onChanged: handleRadioValueChanged,
-                      ),
-                      new Text('Card'),
-                      new Radio(
-                        value: "Cache",
-                        groupValue: paymentmethodType,
-                        onChanged: handleRadioValueChanged,
-                      ),
-                      new Text('Cache'),
-                    ],
+                  Padding(
+                    padding: EdgeInsets.all(0),
+                    child: new Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        new Radio(
+                          value: "Card",
+                          groupValue: paymentmethodType,
+                          onChanged: handleRadioValueChanged,
+                        ),
+                        new Text('Card'),
+                        new Radio(
+                          value: "Cache",
+                          groupValue: paymentmethodType,
+                          onChanged: handleRadioValueChanged,
+                        ),
+                        new Text('Cache'),
+                      ],
+                    ),
                   ),
                   TextField(
                     controller: txtDescriptionController,
@@ -130,7 +133,7 @@ class _ExpensePage extends State<Expenseform> {
                       icon: const Icon(Icons.attach_money),
                     ),
                   ),
-                   TextField(
+                  TextField(
                     controller: txtCurrencyController,
                     onChanged: (v) => txtCurrencyController.text = v,
                     decoration: new InputDecoration(
@@ -199,35 +202,52 @@ class _ExpensePage extends State<Expenseform> {
   }
 
   Widget enableUpload() {
-    return Container(
+    return Padding(
+        padding: EdgeInsets.all(28.0),
         child: Row(
-      children: <Widget>[
-        new IconButton(
-          icon: new Icon(Icons.camera_enhance),
-          color: Colors.orange,
-          tooltip: 'Choose camera',
-          onPressed: (() {
-            getImage();
-          }),
-        ),
-        new IconButton(
-          icon: new Icon(Icons.archive),
-          color: Colors.orange,
-          tooltip: 'Choose date',
-          onPressed: (() {}),
-        ),
-        new IconButton(
-          icon: new Icon(Icons.folder),
-          color: Colors.orange,
-          tooltip: 'Document',
-          onPressed: (() {}),
-        ),
-      ],
-    ));
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            FloatingActionButton(
+              onPressed: (() {
+                getImagefromCamera();
+              }),
+              tooltip: 'Increment Counter',
+              child: Icon(Icons.camera_enhance, size: 48, color: Colors.white),
+              backgroundColor: Colors.amber,
+            ),
+            FloatingActionButton(
+              onPressed: (() {
+                getImage();
+              }),
+              tooltip: 'Increment Counter',
+              child: Icon(Icons.photo_album, size: 48, color: Colors.white),
+              backgroundColor: Colors.green,
+            ),
+            FloatingActionButton(
+              onPressed: (() {
+                getImage();
+              }),
+              tooltip: 'Increment Counter',
+              child: Icon(Icons.archive, size: 48, color: Colors.white),
+              backgroundColor: Colors.orange,
+              
+            ),
+          ],
+        ));
   }
 
   Future getImage() async {
     var tempImage = await ImagePicker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      sampleImage = tempImage;
+    });
+
+    documentFilename = sampleImage.path.substring(
+        sampleImage.path.lastIndexOf("/") + 1, sampleImage.path.length);
+  }
+
+  Future getImagefromCamera() async {
+    var tempImage = await ImagePicker.pickImage(source: ImageSource.camera);
     setState(() {
       sampleImage = tempImage;
     });
@@ -249,8 +269,7 @@ class _ExpensePage extends State<Expenseform> {
           Firestore.instance.document('users/User1/Trips/-LVaowJaSoKuQWge_NWg');
 
       await reference.collection('TropDocs').add({
-        "Date":
-            DateFormat('yyyy-MM-dd').format(selectedDate).toString(),
+        "Date": DateFormat('yyyy-MM-dd').format(selectedDate).toString(),
         "FilePath": downloadURL,
         "ExpenseCategory": _expenceType,
         "DevicePhysicalPath": sampleImage.path,
@@ -258,7 +277,7 @@ class _ExpensePage extends State<Expenseform> {
         "Paymnet Method": paymentmethodType,
         "Currency": txtCurrencyController.text,
         "Description": txtDescriptionController.text,
-         "Receipt No": txtReceiptNoController.text,
+        "Receipt No": txtReceiptNoController.text,
       });
     }
   }
