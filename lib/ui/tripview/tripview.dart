@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kclaim/bottom_sheet_fix.dart';
+import 'package:kclaim/ui/starttripdialog/starttrip.dart';
 import 'package:kclaim/ui/tripdocumnet/tripdocs.dart';
+import 'package:path/path.dart';
 
 
 class TripScreen extends StatefulWidget {
@@ -9,10 +12,34 @@ class TripScreen extends StatefulWidget {
   final String title;
 
   @override
-  _TripScreenState createState() => _TripScreenState();
+  _TripScreenState createState() => new _TripScreenState();
 }
 
+
 class _TripScreenState extends State<TripScreen> {
+
+   void addtrip(BuildContext context) {
+    // showModalBottomSheet<void>(
+    //   context: context,
+    //   builder: (BuildContext context) {
+    //     return TripDialog();
+    //   },
+    // );
+
+    showModalBottomSheetApp(  builder: (builder) { return  TripDialog(); }, context: context);
+   }
+
+  //   void _showMButtoModal() {
+  //   showModalBottomSheet<void>(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return enableUpload();
+  //     },
+  //   );
+  // }
+
+ // showModalBottomSheetApp( context: context, builder: (builder) { return  addtrip(); });
+  
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +64,17 @@ class _TripScreenState extends State<TripScreen> {
         },
         
       )),
+      floatingActionButton: FloatingActionButton(
+        onPressed: (() {
+          addtrip(context);
+        }),
+        tooltip: 'Add Trip',
+        child: Icon(Icons.add),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
+
+    
   }
 
   _buildlistitem(BuildContext context, DocumentSnapshot document) {
