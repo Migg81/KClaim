@@ -25,55 +25,103 @@ class AddNewTripDialogState extends State<TripDialog> {
       });
   }
 
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        new ListTile(
-          leading: const Icon(Icons.person),
-          title: new TextField(
-            controller: txtTripNameController,
-            onChanged: (v) => txtTripNameController.text = v,
-            decoration: new InputDecoration(
-              hintText: "Name",
-            ),
-          ),
-        ),
-        ListTile(
-            leading: const Icon(Icons.calendar_today),
-            title: Text("${DateFormat('yyyy-MM-dd').format(selectedDate)}"),
-            onTap: () {
-              _selectDate(context);
-            }),
-        new Row /*or Column*/ (
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            new IconButton(
-              icon: new Icon(Icons.done),
-              color: Colors.orange,
-              tooltip: 'Choose date',
-              onPressed: (() {
-                Firestore.instance
-                    .runTransaction((Transaction transaction) async {
-                  CollectionReference reference = Firestore.instance
-                      .document('users/User1')
-                      .collection('Trips');
+  Widget _createPillButton(
+    String text) {
+    return new ClipRRect(
+      borderRadius: new BorderRadius.circular(40.0),
+      child: new MaterialButton(
+        minWidth: 100.0,
+       // color: backgroundColor,
+       // textColor: textColor,
+        onPressed: () async {
+          //final file = await _localFile;
+          Firestore.instance.runTransaction((Transaction transaction) async {
+            CollectionReference reference =
+                Firestore.instance.document('users/User1').collection('Trips');
 
-                  await reference.add({
-                    "Tripname": txtTripNameController.text,
-                    "TripStartDate": selectedDate,
-                  });
-                  txtTripNameController.clear();
-                });
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => TripScreen()),
-                );
-              }),
-            ),
-          ],
-        ),
-      ],
+            await reference.add({
+              "Tripname": txtTripNameController.text,
+              "TripStartDate": selectedDate,
+            });
+            txtTripNameController.clear();
+          });
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => TripScreen()),
+          );
+        },
+        child: new Text(text),
+      ),
     );
+  }
+
+  Widget build(BuildContext context) {
+    return Container(
+        height: 200,
+        child: Padding(
+          padding: EdgeInsets.all(11),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new ListTile(
+                leading: const Icon(Icons.person),
+                title: new TextField(
+                  style: TextStyle(color: Colors.black),
+                  controller: txtTripNameController,
+                  onChanged: (v) => txtTripNameController.text = v,
+                  decoration: new InputDecoration(
+                    hintText: "Name",
+                  ),
+                ),
+              ),
+              ListTile(
+                  leading: const Icon(Icons.calendar_today),
+                  title:
+                      Text("${DateFormat('yyyy-MM-dd').format(selectedDate)}",style: TextStyle(color: Colors.black),),
+                  onTap: () {
+                    _selectDate(context);
+                  }),
+              new Row /*or Column*/ (
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  new DecoratedBox(
+                    decoration: new BoxDecoration(
+                        border: new Border.all(color: Colors.red.shade900),
+                        borderRadius: new BorderRadius.circular(30.0),
+                        color: Colors.red.shade900),
+                    child: _createPillButton(
+                      'Save'
+                      //textColor: Colors.white70,
+                    ),
+                  ),
+                  // new IconButton(
+                  //   icon: new Icon(Icons.done),
+                  //   color: Colors.orange,
+                  //   tooltip: 'Choose date',
+                  //   onPressed: (() {
+                  //     Firestore.instance
+                  //         .runTransaction((Transaction transaction) async {
+                  //       CollectionReference reference = Firestore.instance
+                  //           .document('users/User1')
+                  //           .collection('Trips');
+
+                  //       await reference.add({
+                  //         "Tripname": txtTripNameController.text,
+                  //         "TripStartDate": selectedDate,
+                  //       });
+                  //       txtTripNameController.clear();
+                  //     });
+                  //     Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(builder: (context) => TripScreen()),
+                  //     );
+                  //   }),
+                  // ),
+                ],
+              ),
+            ],
+          ),
+        ));
+    //return ;
   }
 }

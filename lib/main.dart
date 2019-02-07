@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
         primaryColorLight: Colors.red.shade700,
         brightness: Brightness.light,
         buttonColor: Colors.red.shade900,
+        buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
         iconTheme: new IconThemeData(
             color: Colors.deepOrangeAccent[700],
             opacity: 1.0,
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
           title: TextStyle(fontSize: 36.0, fontStyle: FontStyle.normal,color: Colors.white),
           body1: TextStyle(fontSize: 14.0, fontFamily: 'Hind',color: Colors.white),
           subhead: TextStyle(fontSize: 17.0, fontStyle: FontStyle.normal,color: Colors.white),
+          
         ),
       ),
       home: TripScreen(), //(title: 'Kmart buisness trip claim.'),

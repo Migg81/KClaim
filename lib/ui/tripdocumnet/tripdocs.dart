@@ -7,7 +7,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-
 import 'package:path_provider/path_provider.dart';
 
 class MyTripDocWidget extends StatefulWidget {
@@ -51,26 +50,6 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: _calculatingtravelCost(
                           followerStyle, '${widget.tripId}')))),
-          Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                _createPillButton(
-                  'EMAIL ME',
-                  '${widget.tripId}',
-                  backgroundColor: theme.accentColor,
-                ),
-                new DecoratedBox(
-                  decoration: new BoxDecoration(
-                      border: new Border.all(color: Colors.red.shade900),
-                      borderRadius: new BorderRadius.circular(30.0),
-                      color: Colors.red.shade900),
-                  child: _createPillButton(
-                    'FOLLOW',
-                    '${widget.tripId}',
-                    textColor: Colors.white70,
-                  ),
-                ),
-              ]),
           Expanded(
             child: StreamBuilder(
               stream: Firestore.instance
@@ -137,33 +116,6 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
             planetThumbnail(context, document),
           ],
         ));
-  }
-
-  Widget _createPillButton(
-    String text,
-    String tripId, {
-    Color backgroundColor = Colors.red,
-    Color textColor = Colors.white70,
-  }) {
-    return new ClipRRect(
-      borderRadius: new BorderRadius.circular(40.0),
-      child: new MaterialButton(
-        minWidth: 140.0,
-        color: backgroundColor,
-        textColor: textColor,
-        onPressed: () async {
-          //final file = await _localFile;
-          if (text == 'EMAIL ME') {
-            // Write the file
-            await _pepairingCSVData(tripId);
-            await _uploadCSVToFireStore();
-          } else if (text == 'FOLLOW') {
-            //_uploadCSVToFireStore(file);
-          }
-        },
-        child: new Text(text),
-      ),
-    );
   }
 
   Future getImage() async {
@@ -242,8 +194,6 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
         await _creteLocalocalFile('\r\n' + data, 'APPEND');
       });
     });
-
-    //return localCSV;
   }
 
   _uploadCSVToFireStore() async {
