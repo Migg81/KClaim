@@ -3,6 +3,7 @@ import 'package:kclaim/bottom_sheet_fix.dart';
 import 'package:kclaim/ui/starttripdialog/starttrip.dart';
 import 'package:kclaim/ui/tripview/tripview.dart';
 
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
         primaryColorDark: Colors.red.shade900,
         primaryColorLight: Colors.red.shade700,
         brightness: Brightness.light,
-        // buttonColor: Colors.red.shade900,
+        buttonColor: Colors.red.shade900,
         iconTheme: new IconThemeData(
             color: Colors.deepOrangeAccent[700],
             opacity: 1.0,
@@ -26,9 +27,11 @@ class MyApp extends StatelessWidget {
         accentColor: Colors.red,
         fontFamily: 'Montserrat',
         textTheme: TextTheme(
-          headline: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-          title: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
-          body1: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
+          button: TextStyle(fontSize: 16.0,color: Colors.white),
+          headline: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold,color: Colors.white),
+          title: TextStyle(fontSize: 36.0, fontStyle: FontStyle.normal,color: Colors.white),
+          body1: TextStyle(fontSize: 14.0, fontFamily: 'Hind',color: Colors.white),
+          subhead: TextStyle(fontSize: 17.0, fontStyle: FontStyle.normal,color: Colors.white),
         ),
       ),
       home: TripScreen(), //(title: 'Kmart buisness trip claim.'),
@@ -46,14 +49,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _incrementCounter() {
-    // showModalBottomSheet<void>(
-    //   context: context,
-    //   builder: (BuildContext context) {
-    //     return addtrip();
-    //   },
-    // );
 
+  void _incrementCounter() {
     showModalBottomSheetApp(
         context: context,
         builder: (builder) {

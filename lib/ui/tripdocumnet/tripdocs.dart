@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kclaim/ui/expenseform/expenseform.dart';
-//import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
@@ -32,16 +31,26 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Trip Doc'),
+        actions: <Widget>[
+          new IconButton(
+            icon: new Icon(Icons.email, size: 30.0),
+            tooltip: 'Choose date',
+            onPressed: (() async {
+              await _pepairingCSVData('${widget.tripId}');
+              await _uploadCSVToFireStore();
+            }),
+          ),
+        ],
       ),
       body: Center(
         child: new Column(children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: new Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children:
-                    _calculatingtravelCost(followerStyle, '${widget.tripId}')),
-          ),
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Container(
+                  child: new Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: _calculatingtravelCost(
+                          followerStyle, '${widget.tripId}')))),
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
@@ -52,9 +61,9 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                 ),
                 new DecoratedBox(
                   decoration: new BoxDecoration(
-                    border: new Border.all(color: Colors.white30),
-                    borderRadius: new BorderRadius.circular(30.0),
-                  ),
+                      border: new Border.all(color: Colors.red.shade900),
+                      borderRadius: new BorderRadius.circular(30.0),
+                      color: Colors.red.shade900),
                   child: _createPillButton(
                     'FOLLOW',
                     '${widget.tripId}',
@@ -109,7 +118,6 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
       alignment: FractionalOffset.centerLeft,
       child: new IconButton(
         icon: new Icon(Icons.picture_as_pdf, size: 30.0),
-        color: Colors.orange,
         tooltip: 'Choose date',
         onPressed: (() {}),
       ),
@@ -134,11 +142,11 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
   Widget _createPillButton(
     String text,
     String tripId, {
-    Color backgroundColor = Colors.transparent,
+    Color backgroundColor = Colors.red,
     Color textColor = Colors.white70,
   }) {
     return new ClipRRect(
-      borderRadius: new BorderRadius.circular(30.0),
+      borderRadius: new BorderRadius.circular(40.0),
       child: new MaterialButton(
         minWidth: 140.0,
         color: backgroundColor,
@@ -174,7 +182,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
         .listen((snapshot) {
       snapshot.documents.forEach((doc) {
         cost = (cost + int.parse(doc.data["Amount"]));
-        kount=kount +1;
+        kount = kount + 1;
         setState(() {
           totalcost = cost;
           count = kount;
@@ -302,40 +310,31 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                     padding: new EdgeInsets.all(7.0),
                     child: new Icon(
                       Icons.credit_card,
-                      color: Colors.orangeAccent,
                     ),
                   ),
                   new Padding(
                     padding: new EdgeInsets.all(7.0),
-                    child: new Text(
-                      document['Paymnet Method'],
-                      style: new TextStyle(fontSize: 18.0),
-                    ),
+                    child: new Text(document['Paymnet Method']),
                   ),
                   new Padding(
                     padding: new EdgeInsets.all(3.0),
                     child: new Icon(
                       Icons.attach_money,
-                      color: Colors.orangeAccent,
                     ),
                   ),
                   new Padding(
                     padding: new EdgeInsets.all(7.0),
-                    child: new Text(document['Amount'],
-                        style: new TextStyle(fontSize: 18.0)),
+                    child: new Text(document['Amount']),
                   ),
                   new Padding(
                     padding: new EdgeInsets.all(3.0),
                     child: new Icon(
                       Icons.calendar_today,
-                      color: Colors.orangeAccent,
                     ),
                   ),
                   new Padding(
-                    padding: new EdgeInsets.all(7.0),
-                    child: new Text(document['Date'],
-                        style: new TextStyle(fontSize: 18.0)),
-                  )
+                      padding: new EdgeInsets.all(7.0),
+                      child: new Text(document['Date']))
                 ],
               ))
         ],

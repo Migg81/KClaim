@@ -79,61 +79,69 @@ class _TripScreenState extends State<TripScreen> {
   }
 
   Widget tripCard(BuildContext context, DocumentSnapshot document) {
-    return new Container(
-      child: Column(
-        children: <Widget>[
-          ListTile(
-              title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Text(
-                document['Tripname'],
-                style: TextStyle(color: Colors.white.withOpacity(1.0)),
-              ),
-              Text(new DateFormat.yMMMd().format(document['TripStartDate']),
-                  style: TextStyle(color: Colors.white.withOpacity(1.0)))
-            ],
-          )),
-          ButtonTheme.bar(
-            // make buttons use the appropriate styles for cards
-            child: ButtonBar(
+    return new GestureDetector(
+      onDoubleTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  MyTripDocWidget(tripId: document.documentID)),
+        );
+      },
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            ListTile(
+                title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                Icon(
-                  Icons.update,
-                  color: Colors.deepOrangeAccent,
+                Text(
+                  document['Tripname'],
+                  style: TextStyle(color: Colors.white.withOpacity(1.0)),
                 ),
-                FlatButton(
-                  child: const Text(
-                    'UPDATE',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              MyTripDocWidget(tripId: document.documentID)),
-                    );
-                  },
-                ),
+                Text(new DateFormat.yMMMd().format(document['TripStartDate']))
               ],
+            )),
+            ButtonTheme.bar(
+              // make buttons use the appropriate styles for cards
+              child: ButtonBar(
+                children: <Widget>[
+                  Icon(
+                    Icons.update,
+                  ),
+                  FlatButton(
+                    child: const Text(
+                      'UPDATE',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                MyTripDocWidget(tripId: document.documentID)),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-      height: 120.0,
-      margin: new EdgeInsets.only(left: 46.0),
-      decoration: new BoxDecoration(
-        color: Colors.grey, //(0xFF333366),
-        shape: BoxShape.rectangle,
-        borderRadius: new BorderRadius.circular(8.0),
-        boxShadow: <BoxShadow>[
-          new BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10.0,
-            offset: new Offset(0.0, 11.0),
-          ),
-        ],
+          ],
+        ),
+        height: 120.0,
+        margin: new EdgeInsets.only(left: 46.0),
+        decoration: new BoxDecoration(
+          color: Colors.grey, //(0xFF333366),
+          shape: BoxShape.rectangle,
+          borderRadius: new BorderRadius.circular(8.0),
+          boxShadow: <BoxShadow>[
+            new BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10.0,
+              offset: new Offset(0.0, 11.0),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -143,7 +151,6 @@ class _TripScreenState extends State<TripScreen> {
     alignment: FractionalOffset.centerLeft,
     child: Icon(
       Icons.flight_takeoff,
-      color: Colors.deepOrangeAccent,
     ),
   );
 }
