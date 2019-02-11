@@ -21,6 +21,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
   File sampleImage;
   int totalcost;
   int count = 0;
+  bool inprogress = false;
 
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -35,6 +36,9 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
             icon: new Icon(Icons.email, size: 30.0),
             tooltip: 'Choose date',
             onPressed: (() async {
+              setState(() {
+                inprogress = true;
+              });
               await _pepairingCSVData('${widget.tripId}');
               await _uploadCSVToFireStore();
             }),
@@ -42,32 +46,34 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
         ],
       ),
       body: Center(
-        child: new Column(children: <Widget>[
-          Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: Container(
-                  child: new Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: _calculatingtravelCost(
-                          followerStyle, '${widget.tripId}')))),
-          Expanded(
-            child: StreamBuilder(
-              stream: Firestore.instance
-                  .document('/users/User1/Trips/${widget.tripId}')
-                  .collection('TropDocs')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Text("Loading....");
-                return ListView.builder(
-                  itemExtent: 150.0,
-                  itemCount: snapshot.data.documents.length,
-                  itemBuilder: (context, index) =>
-                      _buildlistitem(context, snapshot.data.documents[index]),
-                );
-              },
-            ),
-          )
-        ]),
+        child: inprogress
+            ? const Center(child: const CircularProgressIndicator())
+            : new Column(children: <Widget>[
+                Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Container(
+                        child: new Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: _calculatingtravelCost(
+                                followerStyle, '${widget.tripId}')))),
+                Expanded(
+                  child: StreamBuilder(
+                    stream: Firestore.instance
+                        .document('/users/User1/Trips/${widget.tripId}')
+                        .collection('TropDocs')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return const Text("Loading....");
+                      return ListView.builder(
+                        itemExtent: 150.0,
+                        itemCount: snapshot.data.documents.length,
+                        itemBuilder: (context, index) => _buildlistitem(
+                            context, snapshot.data.documents[index]),
+                      );
+                    },
+                  ),
+                )
+              ]),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => setState(() {
@@ -84,6 +90,8 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
   }
 
   _buildlistitem(BuildContext context, DocumentSnapshot document) {
+
+
     return Card(
         elevation: 1.7,
         child: new Container(
@@ -209,6 +217,10 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
 
     if (uploadTask.isComplete) {
       _emailCSV(downloadURL);
+
+      setState(() {
+        inprogress = false;
+      });
     }
   }
 
@@ -264,7 +276,10 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                   ),
                   new Padding(
                     padding: new EdgeInsets.all(7.0),
-                    child: new Text(document['Paymnet Method']),
+                    child: new Text(
+                      document['Paymnet Method'],
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                   new Padding(
                     padding: new EdgeInsets.all(3.0),
@@ -274,7 +289,10 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                   ),
                   new Padding(
                     padding: new EdgeInsets.all(7.0),
-                    child: new Text(document['Amount']),
+                    child: new Text(document['Amount'],
+                        style: TextStyle(
+                          color: Colors.white,
+                        )),
                   ),
                   new Padding(
                     padding: new EdgeInsets.all(3.0),
@@ -284,7 +302,10 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                   ),
                   new Padding(
                       padding: new EdgeInsets.all(7.0),
-                      child: new Text(document['Date']))
+                      child: new Text(
+                        document['Date'],
+                        style: TextStyle(color: Colors.white),
+                      ))
                 ],
               ))
         ],

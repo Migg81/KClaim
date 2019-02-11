@@ -16,6 +16,7 @@ class AddNewTripDialogState extends State<TripDialog> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
         context: context,
+        
         initialDate: selectedDate,
         firstDate: DateTime(2015, 8),
         lastDate: DateTime(2101));
@@ -81,10 +82,10 @@ class AddNewTripDialogState extends State<TripDialog> {
                   onTap: () {
                     _selectDate(context);
                   }),
-              new Row /*or Column*/ (
+              new Row (
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  new DecoratedBox(
+                   DecoratedBox(
                     decoration: new BoxDecoration(
                         border: new Border.all(color: Colors.red.shade900),
                         borderRadius: new BorderRadius.circular(30.0),
@@ -94,29 +95,6 @@ class AddNewTripDialogState extends State<TripDialog> {
                       //textColor: Colors.white70,
                     ),
                   ),
-                  // new IconButton(
-                  //   icon: new Icon(Icons.done),
-                  //   color: Colors.orange,
-                  //   tooltip: 'Choose date',
-                  //   onPressed: (() {
-                  //     Firestore.instance
-                  //         .runTransaction((Transaction transaction) async {
-                  //       CollectionReference reference = Firestore.instance
-                  //           .document('users/User1')
-                  //           .collection('Trips');
-
-                  //       await reference.add({
-                  //         "Tripname": txtTripNameController.text,
-                  //         "TripStartDate": selectedDate,
-                  //       });
-                  //       txtTripNameController.clear();
-                  //     });
-                  //     Navigator.push(
-                  //       context,
-                  //       MaterialPageRoute(builder: (context) => TripScreen()),
-                  //     );
-                  //   }),
-                  // ),
                 ],
               ),
             ],

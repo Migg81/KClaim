@@ -79,6 +79,7 @@ class _ExpensePage extends State<Expenseform> {
                         child: new DropdownButtonHideUnderline(
                           child: new DropdownButton(
                             value: _expenceType,
+                            //style: TextStyle(color: Colors.black),
                             isDense: true,
                             onChanged: (String newValue) {
                               setState(() {
@@ -89,7 +90,7 @@ class _ExpensePage extends State<Expenseform> {
                             items: _expenceTypes.map((String value) {
                               return new DropdownMenuItem(
                                 value: value,
-                                child: new Text(value),
+                                child: new Text(value,style: TextStyle(color: Colors.black),),
                               );
                             }).toList(),
                           ),
@@ -98,6 +99,7 @@ class _ExpensePage extends State<Expenseform> {
                     },
                   ),
                   TextField(
+                    style: TextStyle(color: Colors.black),
                     controller: txtAmountController,
                     onChanged: (v) => txtAmountController.text = v,
                     decoration: new InputDecoration(
@@ -105,8 +107,9 @@ class _ExpensePage extends State<Expenseform> {
                       icon: const Icon(Icons.attach_money),
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.all(0),
+                  Container(
+                    //padding: EdgeInsets.only(left: 0),
+                    margin: EdgeInsets.only(left: 0),
                     child: new Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: <Widget>[
@@ -115,17 +118,19 @@ class _ExpensePage extends State<Expenseform> {
                           groupValue: paymentmethodType,
                           onChanged: handleRadioValueChanged,
                         ),
-                        new Text('Card'),
+                        new Text('Card', style: TextStyle(color: Colors.black)),
                         new Radio(
                           value: "Cache",
                           groupValue: paymentmethodType,
                           onChanged: handleRadioValueChanged,
                         ),
-                        new Text('Cache'),
+                        new Text('Cache',
+                            style: TextStyle(color: Colors.black)),
                       ],
                     ),
                   ),
                   TextField(
+                    style: TextStyle(color: Colors.black),
                     controller: txtDescriptionController,
                     onChanged: (v) => txtDescriptionController.text = v,
                     decoration: new InputDecoration(
@@ -134,6 +139,7 @@ class _ExpensePage extends State<Expenseform> {
                     ),
                   ),
                   TextField(
+                    style: TextStyle(color: Colors.black),
                     controller: txtCurrencyController,
                     onChanged: (v) => txtCurrencyController.text = v,
                     decoration: new InputDecoration(
@@ -142,6 +148,7 @@ class _ExpensePage extends State<Expenseform> {
                     ),
                   ),
                   TextField(
+                    style: TextStyle(color: Colors.black),
                     controller: txtReceiptNoController,
                     onChanged: (v) => txtReceiptNoController.text = v,
                     decoration: new InputDecoration(
@@ -158,7 +165,7 @@ class _ExpensePage extends State<Expenseform> {
                       child: Container(
                         child: new InputDecorator(
                           child: Text(
-                              "${DateFormat('yyyy-MM-dd').format(selectedDate)}"),
+                              "${DateFormat('yyyy-MM-dd').format(selectedDate)}",style: TextStyle(color: Colors.black,)),
                           decoration: const InputDecoration(
                             labelText: '',
                             icon: const Icon(Icons.calendar_today),
@@ -180,13 +187,22 @@ class _ExpensePage extends State<Expenseform> {
                           ),
                         ),
                       )),
-                  IconButton(
-                    icon: Icon(Icons.check_circle_outline),
-                    tooltip: 'Increase volume by 10%',
-                    onPressed: () {
-                      _uploadFileToFireStore();
-                    },
-                  )
+                  Padding(
+                    padding: EdgeInsets.only(right:4,top: 60 ),
+                    child: new Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        DecoratedBox(
+                          decoration: new BoxDecoration(
+                              border:
+                                  new Border.all(color: Colors.red.shade900),
+                              borderRadius: new BorderRadius.circular(30.0),
+                              color: Colors.red.shade900),
+                          child: _createPillButton('Save'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ))),
     );
@@ -198,6 +214,19 @@ class _ExpensePage extends State<Expenseform> {
       builder: (BuildContext context) {
         return enableUpload();
       },
+    );
+  }
+
+  Widget _createPillButton(String text) {
+    return new ClipRRect(
+      borderRadius: new BorderRadius.circular(40.0),
+      child: new MaterialButton(
+        minWidth: 100.0,
+        onPressed: () async {
+          _uploadFileToFireStore();
+        },
+        child: new Text(text),
+      ),
     );
   }
 
@@ -230,7 +259,6 @@ class _ExpensePage extends State<Expenseform> {
               tooltip: 'Increment Counter',
               child: Icon(Icons.archive, size: 48, color: Colors.white),
               backgroundColor: Colors.orange,
-              
             ),
           ],
         ));

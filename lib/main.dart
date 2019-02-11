@@ -25,15 +25,16 @@ class MyApp extends StatelessWidget {
             opacity: 1.0,
             //size: 50.0
         ),
+        inputDecorationTheme: InputDecorationTheme(),
         accentColor: Colors.red,
         fontFamily: 'Montserrat',
         textTheme: TextTheme(
           button: TextStyle(fontSize: 16.0,color: Colors.white),
           headline: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold,color: Colors.white),
           title: TextStyle(fontSize: 36.0, fontStyle: FontStyle.normal,color: Colors.white),
-          body1: TextStyle(fontSize: 14.0, fontFamily: 'Hind',color: Colors.white),
+          body1: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
           subhead: TextStyle(fontSize: 17.0, fontStyle: FontStyle.normal,color: Colors.white),
-          
+          caption: TextStyle()
         ),
       ),
       home: TripScreen(), //(title: 'Kmart buisness trip claim.'),
@@ -67,6 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(child: Container(child: Center(child: TripScreen()))),
+      
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment Counter',
