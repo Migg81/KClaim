@@ -1,11 +1,11 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:kclaim/Model/traveldoc.dart';
 import 'package:kclaim/ui/expenseform/expenseform.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:async';
-import 'dart:io';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -22,6 +22,9 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
   int totalcost;
   int count = 0;
   bool inprogress = false;
+  List<TravelDoc> list;
+
+  Future get ff => null;
 
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -34,7 +37,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
         actions: <Widget>[
           new IconButton(
             icon: new Icon(Icons.email, size: 30.0),
-            tooltip: 'Choose date',
+            tooltip: 'Email',
             onPressed: (() async {
               setState(() {
                 inprogress = true;
@@ -45,41 +48,18 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
           ),
         ],
       ),
-      body: Center(
-        child: inprogress
-            ? const Center(child: const CircularProgressIndicator())
-            : new Column(children: <Widget>[
-                Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: Container(
-                        child: new Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: _calculatingtravelCost(
-                                followerStyle, '${widget.tripId}')))),
-                Expanded(
-                  child: StreamBuilder(
-                    stream: Firestore.instance
-                        .document('/users/User1/Trips/${widget.tripId}')
-                        .collection('TropDocs')
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) return const Text("Loading....");
-                      return ListView.builder(
-                        itemExtent: 150.0,
-                        itemCount: snapshot.data.documents.length,
-                        itemBuilder: (context, index) => _buildlistitem(
-                            context, snapshot.data.documents[index]),
-                      );
-                    },
-                  ),
-                )
-              ]),
+      body: new Center(
+        child: !inprogress
+            ? Center(child: _retrieveUsers())
+            : const Center(child: const CircularProgressIndicator()),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => setState(() {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Expenseform()),
+                MaterialPageRoute(
+                    builder: (context) =>
+                        Expenseform(tripId: '${widget.tripId}')),
               );
             }),
         tooltip: 'Increment Counter',
@@ -89,9 +69,47 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
     );
   }
 
+  StreamBuilder<QuerySnapshot> _retrieveUsers() {
+    return new StreamBuilder<QuerySnapshot>(
+        stream: Firestore.instance
+            .document('/users/User1/Trips/${widget.tripId}')
+            .collection('TropDocs')
+            .snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData || snapshot.data == null) {
+            print("retrieve users do not have data.");
+            return Container();
+          }
+          return ListView.builder(
+              itemCount: snapshot.data.documents.length,
+              itemBuilder: (context, index) {
+                final DocumentSnapshot userDoc = snapshot.data.documents[index];
+                return Dismissible(
+                    key: new Key(userDoc.documentID.toString()),
+                    direction: DismissDirection.horizontal,
+                    onDismissed: (DismissDirection direction) {
+                      Firestore.instance
+                          .document('/users/User1/Trips/${widget.tripId}')
+                          .collection('TropDocs')
+                          .document(userDoc.documentID)
+                          .delete();
+                    },
+                    background: Container(
+                      alignment: AlignmentDirectional.centerEnd,
+                      color: Colors.red,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(0.0, 0.0, 10.0, 0.0),
+                        child: Icon(Icons.delete,
+                            color: Colors.white.withOpacity(1.0), size: 56.0),
+                      ),
+                    ),
+                    child: _buildlistitem(
+                        context, snapshot.data.documents[index]));
+              });
+        });
+  }
+
   _buildlistitem(BuildContext context, DocumentSnapshot document) {
-
-
     return Card(
         elevation: 1.7,
         child: new Container(
@@ -131,127 +149,6 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
     setState(() {
       sampleImage = tempImage;
     });
-  }
-
-  _calculatingtravelCost(TextStyle costStyle, String tripId) {
-    int cost = 0;
-    int kount = 0;
-    Firestore.instance
-        .collection("/users/User1/Trips/$tripId/TropDocs")
-        .snapshots()
-        .listen((snapshot) {
-      snapshot.documents.forEach((doc) {
-        cost = (cost + int.parse(doc.data["Amount"]));
-        kount = kount + 1;
-        setState(() {
-          totalcost = cost;
-          count = kount;
-        });
-      });
-    });
-
-    return (<Widget>[
-      new Text('Totalcost $totalcost', style: costStyle),
-      new Text(
-        ' | ',
-        style:
-            costStyle.copyWith(fontSize: 24.0, fontWeight: FontWeight.normal),
-      ),
-      new Text('No of Documnet $count ', style: costStyle),
-    ]);
-  }
-
-  _pepairingCSVData(String tripId) async {
-    String data =
-        'Date,Expense Category,Travel Location,Expense Nature,Account,Description,Receipt No,' +
-            'Cost Centre,Currency,Foreign Currency Amount,FX Rates,Local Currency Amount,Corporate Card,Remarks';
-    await _creteLocalocalFile(data, 'START');
-    Firestore.instance
-        .collection("/users/User1/Trips/$tripId/TropDocs")
-        .snapshots()
-        .listen((snapshot) {
-      snapshot.documents.forEach((doc) async {
-        //cost = (cost + int.parse(doc.data["Amount"]));
-        data = doc.data["Date"] +
-            ',' +
-            doc.data["ExpenseCategory"] +
-            ',' +
-            '' +
-            ',' +
-            doc.data["ExpenseCategory"] +
-            '' +
-            ',' +
-            '' +
-            ',' +
-            doc.data["Description"] +
-            ',' +
-            doc.data["Receipt No"] +
-            ',' +
-            '' +
-            ',' +
-            '' +
-            ',' +
-            doc.data["Currency"] +
-            ',' +
-            '' +
-            ',' +
-            '' +
-            ',' +
-            '';
-
-        await _creteLocalocalFile('\r\n' + data, 'APPEND');
-      });
-    });
-  }
-
-  _uploadCSVToFireStore() async {
-    final path = await _localPath;
-    final documentFilename =
-        path.substring(path.lastIndexOf("/") + 1, path.length);
-    final StorageReference ref =
-        FirebaseStorage.instance.ref().child('$documentFilename');
-    final StorageUploadTask uploadTask = ref.putFile(new File(path));
-
-    final downloadURL =
-        await (await uploadTask.onComplete).ref.getDownloadURL();
-
-    if (uploadTask.isComplete) {
-      _emailCSV(downloadURL);
-
-      setState(() {
-        inprogress = false;
-      });
-    }
-  }
-
-  _emailCSV(String filelocation) async {
-    String url =
-        'mailto:smith@example.org?subject=News&body=$filelocation%20plugin';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-
-    final path = directory.path;
-
-    return '$path/counter.csv';
-  }
-
-  Future<File> _creteLocalocalFile(String content, String filemode) async {
-    final path = await _localPath;
-    File localFile = File(path);
-
-    if (filemode == 'START') {
-      localFile.writeAsStringSync(content);
-    } else {
-      localFile.writeAsStringSync(content, mode: FileMode.append);
-    }
-    return localFile;
   }
 
   Widget travelDocCard(BuildContext context, DocumentSnapshot document) {
@@ -310,7 +207,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
               ))
         ],
       ),
-      height: 180.0,
+      height: 110.0,
       margin: new EdgeInsets.only(left: 46.0),
       decoration: new BoxDecoration(
         color: Colors.grey, //(0xFF333366),
@@ -325,5 +222,135 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
         ],
       ),
     );
+  }
+
+  _calculatingtravelCost(TextStyle costStyle, String tripId) {
+    int cost = 0;
+    int kount = 0;
+    Firestore.instance
+        .collection("/users/User1/Trips/$tripId/TropDocs")
+        .snapshots()
+        .listen((snapshot) {
+      snapshot.documents.forEach((doc) {
+        cost = (cost + int.parse(doc.data["Amount"]));
+        kount = kount + 1;
+        setState(() {
+          totalcost = cost;
+          count = kount;
+        });
+      });
+    });
+
+    return (<Widget>[
+      new Text('Totalcost $totalcost', style: costStyle),
+      new Text(
+        ' | ',
+        style:
+            costStyle.copyWith(fontSize: 24.0, fontWeight: FontWeight.normal),
+      ),
+      new Text('No of Documnet $count ', style: costStyle),
+    ]);
+  }
+
+  _pepairingCSVData(String tripId) async {
+    String intialdata =
+        'Date,Expense Category,Travel Location,Expense Nature,Account,Description,Receipt No,' +
+            'Cost Centre,Currency,Foreign Currency Amount,FX Rates,Local Currency Amount,Corporate Card,Remarks' +
+            '\r\n';
+    //await _creteLocalocalFile(data, 'START');
+    String data;
+    Firestore.instance
+        .collection("/users/User1/Trips/$tripId/TropDocs")
+        .snapshots()
+        .listen((snapshot) {
+      snapshot.documents.forEach(
+        (doc) async {
+          //cost = (cost + int.parse(doc.data["Amount"]));
+          data = doc.data["Date"] +
+              ',' +
+              doc.data["ExpenseCategory"] +
+              ',' +
+              '' +
+              ',' +
+              doc.data["ExpenseCategory"] +
+              '' +
+              ',' +
+              '' +
+              ',' +
+              doc.data["Description"] +
+              ',' +
+              doc.data["Receipt No"] +
+              ',' +
+              '' +
+              ',' +
+              '' +
+              ',' +
+              doc.data["Currency"] +
+              ',' +
+              '' +
+              ',' +
+              '' +
+              ',' +
+              '';
+
+          //data = data + '\r\n';
+        }
+      );
+    }).onDone(
+      ()
+      {
+        _creteLocalocalFile('\r\n' + intialdata + data, 'APPEND');
+      }
+    );
+  }
+// _creteLocalocalFile('\r\n' + intialdata + data, 'APPEND');
+  _uploadCSVToFireStore() async {
+    final path = await _localPath;
+    final documentFilename =
+        path.substring(path.lastIndexOf("/") + 1, path.length);
+    final StorageReference ref =
+        FirebaseStorage.instance.ref().child('$documentFilename');
+    final StorageUploadTask uploadTask = ref.putFile(new File(path));
+
+    final downloadURL =
+        await (await uploadTask.onComplete).ref.getDownloadURL();
+
+    if (uploadTask.isComplete) {
+      _emailCSV(downloadURL);
+
+      setState(() {
+        inprogress = false;
+      });
+    }
+  }
+
+  _emailCSV(String filelocation) async {
+    String url =
+        'mailto:smith@example.org?subject=News&body=$filelocation%20plugin';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    final path = directory.path;
+
+    return '$path/counter.csv';
+  }
+
+  Future<File> _creteLocalocalFile(String content, String filemode) async {
+    final path = await _localPath;
+    File localFile = File(path);
+
+    if (filemode == 'START') {
+      localFile.writeAsStringSync(content);
+    } else {
+      localFile.writeAsStringSync(content, mode: FileMode.append);
+    }
+    return localFile;
   }
 }

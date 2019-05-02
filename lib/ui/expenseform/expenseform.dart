@@ -5,9 +5,11 @@ import 'dart:async';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kclaim/ui/tripdocumnet/tripdocs.dart';
 
 class Expenseform extends StatefulWidget {
-  Expenseform({Key key, this.title}) : super(key: key);
+  final String tripId;
+  Expenseform({Key key, this.title, this.tripId}) : super(key: key);
   final String title;
 
   @override
@@ -34,6 +36,7 @@ class _ExpensePage extends State<Expenseform> {
   DateTime selectedDate = new DateTime.now();
   File sampleImage;
   String paymentmethodType = "";
+  bool submitting = false;
 
   Future<void> _selectDocUploadDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
@@ -47,6 +50,12 @@ class _ExpensePage extends State<Expenseform> {
       });
   }
 
+
+  void toggleSubmitState() {
+    setState(() {
+      submitting = !submitting;
+    });
+  }
   void handleRadioValueChanged(String value) {
     setState(() {
       paymentmethodType = value;
@@ -59,7 +68,16 @@ class _ExpensePage extends State<Expenseform> {
       appBar: new AppBar(
         title: Text('Expense details'),
       ),
-      body: new SafeArea(
+      body:new Center(
+        child: !submitting
+            ? expenceformUI()
+            : const Center(child: const CircularProgressIndicator()),
+    ));
+  }
+
+
+Widget expenceformUI () {
+  return  new SafeArea(
           top: false,
           bottom: false,
           child: new Form(
@@ -90,7 +108,10 @@ class _ExpensePage extends State<Expenseform> {
                             items: _expenceTypes.map((String value) {
                               return new DropdownMenuItem(
                                 value: value,
-                                child: new Text(value,style: TextStyle(color: Colors.black),),
+                                child: new Text(
+                                  value,
+                                  style: TextStyle(color: Colors.black),
+                                ),
                               );
                             }).toList(),
                           ),
@@ -101,6 +122,7 @@ class _ExpensePage extends State<Expenseform> {
                   TextField(
                     style: TextStyle(color: Colors.black),
                     controller: txtAmountController,
+                    keyboardType: TextInputType.number,
                     onChanged: (v) => txtAmountController.text = v,
                     decoration: new InputDecoration(
                       hintText: "Amount",
@@ -120,11 +142,11 @@ class _ExpensePage extends State<Expenseform> {
                         ),
                         new Text('Card', style: TextStyle(color: Colors.black)),
                         new Radio(
-                          value: "Cache",
+                          value: "Cash",
                           groupValue: paymentmethodType,
                           onChanged: handleRadioValueChanged,
                         ),
-                        new Text('Cache',
+                        new Text('Cash',
                             style: TextStyle(color: Colors.black)),
                       ],
                     ),
@@ -135,7 +157,7 @@ class _ExpensePage extends State<Expenseform> {
                     onChanged: (v) => txtDescriptionController.text = v,
                     decoration: new InputDecoration(
                       hintText: "Description",
-                      icon: const Icon(Icons.attach_money),
+                      icon: const Icon(Icons.note_add),
                     ),
                   ),
                   TextField(
@@ -153,7 +175,7 @@ class _ExpensePage extends State<Expenseform> {
                     onChanged: (v) => txtReceiptNoController.text = v,
                     decoration: new InputDecoration(
                       hintText: "Receipt No.",
-                      icon: const Icon(Icons.attach_money),
+                      icon: const Icon(Icons.receipt),
                     ),
                   ),
                   GestureDetector(
@@ -165,7 +187,10 @@ class _ExpensePage extends State<Expenseform> {
                       child: Container(
                         child: new InputDecorator(
                           child: Text(
-                              "${DateFormat('yyyy-MM-dd').format(selectedDate)}",style: TextStyle(color: Colors.black,)),
+                              "${DateFormat('yyyy-MM-dd').format(selectedDate)}",
+                              style: TextStyle(
+                                color: Colors.black,
+                              )),
                           decoration: const InputDecoration(
                             labelText: '',
                             icon: const Icon(Icons.calendar_today),
@@ -188,7 +213,7 @@ class _ExpensePage extends State<Expenseform> {
                         ),
                       )),
                   Padding(
-                    padding: EdgeInsets.only(right:4,top: 60 ),
+                    padding: EdgeInsets.only(right: 4, top: 60),
                     child: new Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
@@ -204,9 +229,8 @@ class _ExpensePage extends State<Expenseform> {
                     ),
                   ),
                 ],
-              ))),
-    );
-  }
+              )));
+}
 
   void _showMButtoModal() {
     showModalBottomSheet<void>(
@@ -224,10 +248,44 @@ class _ExpensePage extends State<Expenseform> {
         minWidth: 100.0,
         onPressed: () async {
           _uploadFileToFireStore();
+          Navigator.pop(
+            context,
+            MaterialPageRoute(builder: (context) => MyTripDocWidget()),
+          );
         },
         child: new Text(text),
       ),
     );
+  }
+
+ _uploadFileToFireStore() async {
+
+  toggleSubmitState();
+
+    final StorageReference ref =
+        FirebaseStorage.instance.ref().child('$documentFilename');
+    final StorageUploadTask uploadTask = ref.putFile(sampleImage);
+
+    final downloadURL =
+        await (await uploadTask.onComplete).ref.getDownloadURL();
+
+    if (uploadTask.isComplete) {
+      DocumentReference reference =
+          Firestore.instance.document('users/User1/Trips/${widget.tripId}');
+
+      await reference.collection('TropDocs').add({
+        "Date": DateFormat('yyyy-MM-dd').format(selectedDate).toString(),
+        "FilePath": downloadURL,
+        "ExpenseCategory": _expenceType,
+        "DevicePhysicalPath": sampleImage.path,
+        "Amount": txtAmountController.text,
+        "Paymnet Method": paymentmethodType,
+        "Currency": txtCurrencyController.text,
+        "Description": txtDescriptionController.text,
+        "Receipt No": txtReceiptNoController.text,
+      });
+      toggleSubmitState();
+    }
   }
 
   Widget enableUpload() {
@@ -282,31 +340,5 @@ class _ExpensePage extends State<Expenseform> {
 
     documentFilename = sampleImage.path.substring(
         sampleImage.path.lastIndexOf("/") + 1, sampleImage.path.length);
-  }
-
-  _uploadFileToFireStore() async {
-    final StorageReference ref =
-        FirebaseStorage.instance.ref().child('$documentFilename');
-    final StorageUploadTask uploadTask = ref.putFile(sampleImage);
-
-    final downloadURL =
-        await (await uploadTask.onComplete).ref.getDownloadURL();
-
-    if (uploadTask.isComplete) {
-      DocumentReference reference =
-          Firestore.instance.document('users/User1/Trips/-LVaowJaSoKuQWge_NWg');
-
-      await reference.collection('TropDocs').add({
-        "Date": DateFormat('yyyy-MM-dd').format(selectedDate).toString(),
-        "FilePath": downloadURL,
-        "ExpenseCategory": _expenceType,
-        "DevicePhysicalPath": sampleImage.path,
-        "Amount": txtAmountController.text,
-        "Paymnet Method": paymentmethodType,
-        "Currency": txtCurrencyController.text,
-        "Description": txtDescriptionController.text,
-        "Receipt No": txtReceiptNoController.text,
-      });
-    }
   }
 }
