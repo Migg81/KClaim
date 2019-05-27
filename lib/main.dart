@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'KClaim',
       theme: ThemeData(
         // primarySwatch:  Colors.red,
         primaryColor: Colors.red.shade800,
@@ -37,7 +37,26 @@ class MyApp extends StatelessWidget {
           caption: TextStyle()
         ),
       ),
-      home: TripScreen(), //(title: 'Kmart buisness trip claim.'),
+      home: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              tabs: [
+                Tab(text: "ACTIVE" , icon: Icon(Icons.schedule)),
+                Tab(text: "PAST",icon: Icon(Icons.history)),
+              ],
+            ),
+            //title: Text('Tabs Demo'),
+          ),
+          body: TabBarView(
+            children: [
+              TripScreen(),
+              Icon(Icons.directions_transit),
+            ],
+          ),
+        ),
+      ),//TripScreen(), //(title: 'Kmart buisness trip claim.'),
     );
   }
 }

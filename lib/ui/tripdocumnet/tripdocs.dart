@@ -3,11 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:kclaim/Model/traveldoc.dart';
+import 'package:kclaim/bottom_sheet_fix.dart';
 import 'package:kclaim/ui/expenseform/expenseform.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photo_view/photo_view.dart';
 
 class MyTripDocWidget extends StatefulWidget {
   final String tripId;
@@ -122,9 +124,20 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
       margin: new EdgeInsets.symmetric(vertical: 16.0),
       alignment: FractionalOffset.centerLeft,
       child: new IconButton(
-        icon: new Icon(Icons.picture_as_pdf, size: 30.0),
+        icon: new Icon(Icons.image, size: 30.0),
         tooltip: 'Choose date',
-        onPressed: (() {}),
+        onPressed: (() {
+          showModalBottomSheetApp(
+              context: context,
+              builder: (builder) {
+                return Container(
+                    child: PhotoView(
+                  imageProvider: NetworkImage(
+                    document['FilePath'],
+                  ),
+                ));
+              });
+        }),
       ),
     );
   }
@@ -263,46 +276,42 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
         .collection("/users/User1/Trips/$tripId/TropDocs")
         .snapshots()
         .listen((snapshot) {
-      snapshot.documents.forEach(
-        (doc) async {
-          //cost = (cost + int.parse(doc.data["Amount"]));
-          data = doc.data["Date"] +
-              ',' +
-              doc.data["ExpenseCategory"] +
-              ',' +
-              '' +
-              ',' +
-              doc.data["ExpenseCategory"] +
-              '' +
-              ',' +
-              '' +
-              ',' +
-              doc.data["Description"] +
-              ',' +
-              doc.data["Receipt No"] +
-              ',' +
-              '' +
-              ',' +
-              '' +
-              ',' +
-              doc.data["Currency"] +
-              ',' +
-              '' +
-              ',' +
-              '' +
-              ',' +
-              '';
+      snapshot.documents.forEach((doc) async {
+        //cost = (cost + int.parse(doc.data["Amount"]));
+        data = doc.data["Date"] +
+            ',' +
+            doc.data["ExpenseCategory"] +
+            ',' +
+            '' +
+            ',' +
+            doc.data["ExpenseCategory"] +
+            '' +
+            ',' +
+            '' +
+            ',' +
+            doc.data["Description"] +
+            ',' +
+            doc.data["Receipt No"] +
+            ',' +
+            '' +
+            ',' +
+            '' +
+            ',' +
+            doc.data["Currency"] +
+            ',' +
+            '' +
+            ',' +
+            '' +
+            ',' +
+            '';
 
-          //data = data + '\r\n';
-        }
-      );
-    }).onDone(
-      ()
-      {
-        _creteLocalocalFile('\r\n' + intialdata + data, 'APPEND');
-      }
-    );
+        //data = data + '\r\n';
+      });
+    }).onDone(() {
+      _creteLocalocalFile('\r\n' + intialdata + data, 'APPEND');
+    });
   }
+
 // _creteLocalocalFile('\r\n' + intialdata + data, 'APPEND');
   _uploadCSVToFireStore() async {
     final path = await _localPath;

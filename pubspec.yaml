@@ -19,6 +19,8 @@ dependencies:
   path_provider:
   image_picker:
   url_launcher:
+  photo_view:
+  http: ^0.12.0+2
   intl: ^0.15.7
   flutter:
     sdk: flutter

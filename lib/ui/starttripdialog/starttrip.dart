@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:intl/intl.dart";
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kclaim/DBandService/APIServices.dart';
+import 'package:kclaim/Model/Trip.dart';
 import 'package:kclaim/ui/tripview/tripview.dart';
 
 class TripDialog extends StatefulWidget {
@@ -16,7 +17,6 @@ class AddNewTripDialogState extends State<TripDialog> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
         context: context,
-        
         initialDate: selectedDate,
         firstDate: DateTime(2015, 8),
         lastDate: DateTime(2101));
@@ -26,26 +26,21 @@ class AddNewTripDialogState extends State<TripDialog> {
       });
   }
 
-  Widget _createPillButton(
-    String text) {
+  Widget _createPillButton(String text) {
     return new ClipRRect(
       borderRadius: new BorderRadius.circular(40.0),
       child: new MaterialButton(
         minWidth: 100.0,
-       // color: backgroundColor,
-       // textColor: textColor,
+        // color: backgroundColor,
+        // textColor: textColor,
         onPressed: () async {
-          //final file = await _localFile;
-          Firestore.instance.runTransaction((Transaction transaction) async {
-            CollectionReference reference =
-                Firestore.instance.document('users/User1').collection('Trips');
+          var addTrip = new Trip();
+          addTrip.id = 1;
+          addTrip.tripName = txtTripNameController.text;
+          addTrip.date = selectedDate.toString();
 
-            await reference.add({
-              "Tripname": txtTripNameController.text,
-              "TripStartDate": selectedDate,
-            });
-            txtTripNameController.clear();
-          });
+          await createPost(addTrip, 1);
+
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => TripScreen()),
@@ -77,23 +72,24 @@ class AddNewTripDialogState extends State<TripDialog> {
               ),
               ListTile(
                   leading: const Icon(Icons.calendar_today),
-                  title:
-                      Text("${DateFormat('yyyy-MM-dd').format(selectedDate)}",style: TextStyle(color: Colors.black),),
+                  title: Text(
+                    "${DateFormat('yyyy-MM-dd').format(selectedDate)}",
+                    style: TextStyle(color: Colors.black),
+                  ),
                   onTap: () {
                     _selectDate(context);
                   }),
-              new Row (
+              new Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                   DecoratedBox(
+                  DecoratedBox(
                     decoration: new BoxDecoration(
                         border: new Border.all(color: Colors.red.shade900),
                         borderRadius: new BorderRadius.circular(30.0),
                         color: Colors.red.shade900),
-                    child: _createPillButton(
-                      'Save'
-                      //textColor: Colors.white70,
-                    ),
+                    child: _createPillButton('Save'
+                        //textColor: Colors.white70,
+                        ),
                   ),
                 ],
               ),

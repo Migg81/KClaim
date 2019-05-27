@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:kclaim/DBandService/APIServices.dart';
+import 'package:kclaim/Model/Trip.dart';
 import 'package:kclaim/bottom_sheet_fix.dart';
 import 'package:kclaim/ui/starttripdialog/starttrip.dart';
 import 'package:kclaim/ui/tripdocumnet/tripdocs.dart';
@@ -25,23 +27,28 @@ class _TripScreenState extends State<TripScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final _streamController = new StreamController<List<Trip>>();
+
+
+getTripsforUser(1).then((res) async{
+      _streamController.add(res);
+      return res;
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Trips"),
       ),
       body: Center(
           child: StreamBuilder(
-        stream: Firestore.instance
-            .document('users/User1')
-            .collection('Trips')
-            .snapshots(),
+        stream: _streamController.stream,
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const Text("Loading....");
           return ListView.builder(
             itemExtent: 130.0,
-            itemCount: snapshot.data.documents.length,
+            itemCount: snapshot.data.length,
             itemBuilder: (context, index) =>
-                _buildlistitem(context, snapshot.data.documents[index]),
+                _buildlistitem(context, snapshot.data.elementAt(index)),
           );
         },
       )),
@@ -91,7 +98,7 @@ class _TripScreenState extends State<TripScreen> {
     );
   }
 
-  Widget cardRowDecor(BuildContext context, DocumentSnapshot document) {
+  Widget cardRowDecor(BuildContext context, Trip document) {
     return new Container(
         margin: const EdgeInsets.symmetric(
           vertical: 1.0,
@@ -105,7 +112,7 @@ class _TripScreenState extends State<TripScreen> {
         ));
   }
 
-  _buildlistitem(BuildContext context, DocumentSnapshot document) {
+  _buildlistitem(BuildContext context, Trip document) {
     return Card(
         elevation: 1.7,
         child: new Container(
@@ -113,14 +120,14 @@ class _TripScreenState extends State<TripScreen> {
         ));
   }
 
-  Widget tripCard(BuildContext context, DocumentSnapshot document) {
+  Widget tripCard(BuildContext context, Trip document) {
     return new GestureDetector(
       onDoubleTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  MyTripDocWidget(tripId: document.documentID)),
+                  MyTripDocWidget(tripId: document.id.toString())),
         );
       },
       child: Container(
@@ -131,10 +138,11 @@ class _TripScreenState extends State<TripScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Text(
-                  document['Tripname'],
+                  document.tripName,
                   style: TextStyle(color: Colors.white.withOpacity(1.0)),
                 ),
-                Text(new DateFormat.yMMMd().format(document['TripStartDate']))
+                 Text(new DateFormat.yMMMd().format(DateTime.parse(document.date)))
+               // Text(document.date)
               ],
             )),
             ButtonTheme.bar(
@@ -154,7 +162,7 @@ class _TripScreenState extends State<TripScreen> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                MyTripDocWidget(tripId: document.documentID)),
+                                MyTripDocWidget(tripId: document.id.toString())),
                       );
                     },
                   ),
