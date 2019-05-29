@@ -1,5 +1,5 @@
-class TravelDoc {
-  TravelDoc(
+class TripExpense {
+  TripExpense(
       {this.id,
       this.amount,
       this.currency,
@@ -9,7 +9,8 @@ class TravelDoc {
       this.expenseCategory,
       this.filePath,
       this.paymnetMethod,
-      this.receiptNo});
+      this.receiptNo,
+      this.tripId});
   String id;
   String amount;
   String currency;
@@ -20,23 +21,22 @@ class TravelDoc {
   String filePath;
   String paymnetMethod;
   String receiptNo;
+  String tripId;
 
-
-   TravelDoc.fromMap(Map<String, dynamic> map) {
-
- 
-    this.id = map['documentID'];
-    this.amount = map['Amount'];
+  TripExpense.fromMap(Map<String, dynamic> map) {
+    this.id = map['Document_Id'].toString();
+    this.amount = map['Amount'].toString();
     this.currency = map['Currency'];
 
     this.date = map['Date'];
     this.description = map['Description'];
-    this.devicePhysicalPath = map['DevicePhysicalPath'];
+    this.devicePhysicalPath = map['Device_Physical_Path'];
 
-    this.expenseCategory = map['ExpenseCategory'];
-    this.filePath = map['FilePath'];
-    this.paymnetMethod = map['Paymnet Method'];
+    this.expenseCategory = map['Expense_Category'];
+    this.filePath = map['File_Path'];
+    this.paymnetMethod = map['Payment_Method'];
 
-    this.receiptNo = map['Receipt No'];
+    this.receiptNo = map['Receipt_Number'];
+    this.tripId = map['Trip_Id'].toString();
   }
 }

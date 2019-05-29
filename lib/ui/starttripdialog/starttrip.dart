@@ -39,7 +39,7 @@ class AddNewTripDialogState extends State<TripDialog> {
           addTrip.tripName = txtTripNameController.text;
           addTrip.date = selectedDate.toString();
 
-          await createPost(addTrip, 1);
+          await addTripforUser(addTrip, 1);
 
           Navigator.push(
             context,

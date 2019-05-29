@@ -1,10 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'dart:io';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kclaim/DBandService/APIServices.dart';
+import 'package:kclaim/Model/TripExpense.dart';
 import 'package:kclaim/ui/tripdocumnet/tripdocs.dart';
 
 class Expenseform extends StatefulWidget {
@@ -50,12 +50,12 @@ class _ExpensePage extends State<Expenseform> {
       });
   }
 
-
   void toggleSubmitState() {
     setState(() {
       submitting = !submitting;
     });
   }
+
   void handleRadioValueChanged(String value) {
     setState(() {
       paymentmethodType = value;
@@ -65,172 +65,169 @@ class _ExpensePage extends State<Expenseform> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(
-        title: Text('Expense details'),
-      ),
-      body:new Center(
-        child: !submitting
-            ? expenceformUI()
-            : const Center(child: const CircularProgressIndicator()),
-    ));
+        appBar: new AppBar(
+          title: Text('Expense details'),
+        ),
+        body: new Center(
+          child: !submitting
+              ? expenceformUI()
+              : const Center(child: const CircularProgressIndicator()),
+        ));
   }
 
-
-Widget expenceformUI () {
-  return  new SafeArea(
-          top: false,
-          bottom: false,
-          child: new Form(
-              key: _formKey,
-              autovalidate: true,
-              child: new ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                children: <Widget>[
-                  new FormField(
-                    builder: (FormFieldState state) {
-                      return InputDecorator(
-                        decoration: InputDecoration(
-                          icon: const Icon(Icons.category),
-                          labelText: 'Expense Category',
+  Widget expenceformUI() {
+    return new SafeArea(
+        top: false,
+        bottom: false,
+        child: new Form(
+            key: _formKey,
+            autovalidate: true,
+            child: new ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              children: <Widget>[
+                new FormField(
+                  builder: (FormFieldState state) {
+                    return InputDecorator(
+                      decoration: InputDecoration(
+                        icon: const Icon(Icons.category),
+                        labelText: 'Expense Category',
+                      ),
+                      isEmpty: _expenceType == '',
+                      child: new DropdownButtonHideUnderline(
+                        child: new DropdownButton(
+                          value: _expenceType,
+                          //style: TextStyle(color: Colors.black),
+                          isDense: true,
+                          onChanged: (String newValue) {
+                            setState(() {
+                              _expenceType = newValue;
+                              state.didChange(newValue);
+                            });
+                          },
+                          items: _expenceTypes.map((String value) {
+                            return new DropdownMenuItem(
+                              value: value,
+                              child: new Text(
+                                value,
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            );
+                          }).toList(),
                         ),
-                        isEmpty: _expenceType == '',
-                        child: new DropdownButtonHideUnderline(
-                          child: new DropdownButton(
-                            value: _expenceType,
-                            //style: TextStyle(color: Colors.black),
-                            isDense: true,
-                            onChanged: (String newValue) {
-                              setState(() {
-                                _expenceType = newValue;
-                                state.didChange(newValue);
-                              });
-                            },
-                            items: _expenceTypes.map((String value) {
-                              return new DropdownMenuItem(
-                                value: value,
-                                child: new Text(
-                                  value,
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      );
+                      ),
+                    );
+                  },
+                ),
+                TextField(
+                  style: TextStyle(color: Colors.black),
+                  controller: txtAmountController,
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) => txtAmountController.text = v,
+                  decoration: new InputDecoration(
+                    hintText: "Amount",
+                    icon: const Icon(Icons.attach_money),
+                  ),
+                ),
+                Container(
+                  //padding: EdgeInsets.only(left: 0),
+                  margin: EdgeInsets.only(left: 0),
+                  child: new Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      new Radio(
+                        value: "Card",
+                        groupValue: paymentmethodType,
+                        onChanged: handleRadioValueChanged,
+                      ),
+                      new Text('Card', style: TextStyle(color: Colors.black)),
+                      new Radio(
+                        value: "Cash",
+                        groupValue: paymentmethodType,
+                        onChanged: handleRadioValueChanged,
+                      ),
+                      new Text('Cash', style: TextStyle(color: Colors.black)),
+                    ],
+                  ),
+                ),
+                TextField(
+                  style: TextStyle(color: Colors.black),
+                  controller: txtDescriptionController,
+                  onChanged: (v) => txtDescriptionController.text = v,
+                  decoration: new InputDecoration(
+                    hintText: "Description",
+                    icon: const Icon(Icons.note_add),
+                  ),
+                ),
+                TextField(
+                  style: TextStyle(color: Colors.black),
+                  controller: txtCurrencyController,
+                  onChanged: (v) => txtCurrencyController.text = v,
+                  decoration: new InputDecoration(
+                    hintText: "Currency",
+                    icon: const Icon(Icons.attach_money),
+                  ),
+                ),
+                TextField(
+                  style: TextStyle(color: Colors.black),
+                  controller: txtReceiptNoController,
+                  onChanged: (v) => txtReceiptNoController.text = v,
+                  decoration: new InputDecoration(
+                    hintText: "Receipt No.",
+                    icon: const Icon(Icons.receipt),
+                  ),
+                ),
+                GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectDocUploadDate(context);
+                      });
                     },
-                  ),
-                  TextField(
-                    style: TextStyle(color: Colors.black),
-                    controller: txtAmountController,
-                    keyboardType: TextInputType.number,
-                    onChanged: (v) => txtAmountController.text = v,
-                    decoration: new InputDecoration(
-                      hintText: "Amount",
-                      icon: const Icon(Icons.attach_money),
-                    ),
-                  ),
-                  Container(
-                    //padding: EdgeInsets.only(left: 0),
-                    margin: EdgeInsets.only(left: 0),
-                    child: new Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        new Radio(
-                          value: "Card",
-                          groupValue: paymentmethodType,
-                          onChanged: handleRadioValueChanged,
+                    child: Container(
+                      child: new InputDecorator(
+                        child: Text(
+                            "${DateFormat('yyyy-MM-dd').format(selectedDate)}",
+                            style: TextStyle(
+                              color: Colors.black,
+                            )),
+                        decoration: const InputDecoration(
+                          labelText: '',
+                          icon: const Icon(Icons.calendar_today),
                         ),
-                        new Text('Card', style: TextStyle(color: Colors.black)),
-                        new Radio(
-                          value: "Cash",
-                          groupValue: paymentmethodType,
-                          onChanged: handleRadioValueChanged,
+                      ),
+                    )),
+                GestureDetector(
+                    onTap: () {
+                      _showMButtoModal();
+                    },
+                    child: Container(
+                      child: new InputDecorator(
+                        child: (sampleImage == null
+                            ? Text("Upload file")
+                            : Text("$documentFilename")),
+                        decoration: const InputDecoration(
+                          labelText: '',
+                          icon: const Icon(Icons.file_upload),
                         ),
-                        new Text('Cash',
-                            style: TextStyle(color: Colors.black)),
-                      ],
-                    ),
+                      ),
+                    )),
+                Padding(
+                  padding: EdgeInsets.only(right: 4, top: 60),
+                  child: new Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      DecoratedBox(
+                        decoration: new BoxDecoration(
+                            border: new Border.all(color: Colors.red.shade900),
+                            borderRadius: new BorderRadius.circular(30.0),
+                            color: Colors.red.shade900),
+                        child: _createPillButton('Save'),
+                      ),
+                    ],
                   ),
-                  TextField(
-                    style: TextStyle(color: Colors.black),
-                    controller: txtDescriptionController,
-                    onChanged: (v) => txtDescriptionController.text = v,
-                    decoration: new InputDecoration(
-                      hintText: "Description",
-                      icon: const Icon(Icons.note_add),
-                    ),
-                  ),
-                  TextField(
-                    style: TextStyle(color: Colors.black),
-                    controller: txtCurrencyController,
-                    onChanged: (v) => txtCurrencyController.text = v,
-                    decoration: new InputDecoration(
-                      hintText: "Currency",
-                      icon: const Icon(Icons.attach_money),
-                    ),
-                  ),
-                  TextField(
-                    style: TextStyle(color: Colors.black),
-                    controller: txtReceiptNoController,
-                    onChanged: (v) => txtReceiptNoController.text = v,
-                    decoration: new InputDecoration(
-                      hintText: "Receipt No.",
-                      icon: const Icon(Icons.receipt),
-                    ),
-                  ),
-                  GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectDocUploadDate(context);
-                        });
-                      },
-                      child: Container(
-                        child: new InputDecorator(
-                          child: Text(
-                              "${DateFormat('yyyy-MM-dd').format(selectedDate)}",
-                              style: TextStyle(
-                                color: Colors.black,
-                              )),
-                          decoration: const InputDecoration(
-                            labelText: '',
-                            icon: const Icon(Icons.calendar_today),
-                          ),
-                        ),
-                      )),
-                  GestureDetector(
-                      onTap: () {
-                        _showMButtoModal();
-                      },
-                      child: Container(
-                        child: new InputDecorator(
-                          child: (sampleImage == null
-                              ? Text("Upload file")
-                              : Text("$documentFilename")),
-                          decoration: const InputDecoration(
-                            labelText: '',
-                            icon: const Icon(Icons.file_upload),
-                          ),
-                        ),
-                      )),
-                  Padding(
-                    padding: EdgeInsets.only(right: 4, top: 60),
-                    child: new Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: <Widget>[
-                        DecoratedBox(
-                          decoration: new BoxDecoration(
-                              border:
-                                  new Border.all(color: Colors.red.shade900),
-                              borderRadius: new BorderRadius.circular(30.0),
-                              color: Colors.red.shade900),
-                          child: _createPillButton('Save'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              )));
-}
+                ),
+              ],
+            )));
+  }
 
   void _showMButtoModal() {
     showModalBottomSheet<void>(
@@ -258,34 +255,46 @@ Widget expenceformUI () {
     );
   }
 
- _uploadFileToFireStore() async {
+  _uploadFileToFireStore() async {
+    toggleSubmitState();
 
-  toggleSubmitState();
+    // final StorageReference ref =
+    //     FirebaseStorage.instance.ref().child('$documentFilename');
+    // final StorageUploadTask uploadTask = ref.putFile(sampleImage);
 
-    final StorageReference ref =
-        FirebaseStorage.instance.ref().child('$documentFilename');
-    final StorageUploadTask uploadTask = ref.putFile(sampleImage);
+    // final downloadURL =
+    //     await (await uploadTask.onComplete).ref.getDownloadURL();
 
-    final downloadURL =
-        await (await uploadTask.onComplete).ref.getDownloadURL();
+    // if (uploadTask.isComplete) {
+    //   DocumentReference reference =
+    //       Firestore.instance.document('users/User1/Trips/${widget.tripId}');
 
-    if (uploadTask.isComplete) {
-      DocumentReference reference =
-          Firestore.instance.document('users/User1/Trips/${widget.tripId}');
+    //   await reference.collection('TropDocs').add({
+    //     "Date": DateFormat('yyyy-MM-dd').format(selectedDate).toString(),
+    //     "FilePath": downloadURL,
+    //     "ExpenseCategory": _expenceType,
+    //     "DevicePhysicalPath": sampleImage.path,
+    //     "Amount": txtAmountController.text,
+    //     "Paymnet Method": paymentmethodType,
+    //     "Currency": txtCurrencyController.text,
+    //     "Description": txtDescriptionController.text,
+    //     "Receipt No": txtReceiptNoController.text,
+    //   });
+    //   toggleSubmitState();
+    // }
 
-      await reference.collection('TropDocs').add({
-        "Date": DateFormat('yyyy-MM-dd').format(selectedDate).toString(),
-        "FilePath": downloadURL,
-        "ExpenseCategory": _expenceType,
-        "DevicePhysicalPath": sampleImage.path,
-        "Amount": txtAmountController.text,
-        "Paymnet Method": paymentmethodType,
-        "Currency": txtCurrencyController.text,
-        "Description": txtDescriptionController.text,
-        "Receipt No": txtReceiptNoController.text,
-      });
-      toggleSubmitState();
-    }
+    TripExpense te = new TripExpense();
+    te.tripId = widget.tripId;
+    te.amount = txtAmountController.text;
+    te.currency = txtAmountController.text;
+    te.date = DateFormat('yyyy-MM-dd').format(selectedDate).toString();
+    te.description = txtDescriptionController.text;
+    te.devicePhysicalPath = sampleImage.path;
+    te.filePath = "";
+    te.receiptNo = txtReceiptNoController.text;
+    te.paymnetMethod = paymentmethodType;
+
+    addTripDoc(te, 1);
   }
 
   Widget enableUpload() {

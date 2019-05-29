@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kclaim/DBandService/APIServices.dart';
@@ -27,13 +26,6 @@ class _TripScreenState extends State<TripScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final _streamController = new StreamController<List<Trip>>();
-
-
-getTripsforUser(1).then((res) async{
-      _streamController.add(res);
-      return res;
-    });
 
     return Scaffold(
       appBar: AppBar(
@@ -41,7 +33,7 @@ getTripsforUser(1).then((res) async{
       ),
       body: Center(
           child: StreamBuilder(
-        stream: _streamController.stream,
+        stream: getTrips(1),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const Text("Loading....");
           return ListView.builder(

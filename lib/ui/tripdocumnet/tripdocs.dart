@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:kclaim/Model/traveldoc.dart';
+import 'package:intl/intl.dart';
+import 'package:kclaim/DBandService/APIServices.dart';
+import 'package:kclaim/Model/TripExpense.dart';
 import 'package:kclaim/bottom_sheet_fix.dart';
 import 'package:kclaim/ui/expenseform/expenseform.dart';
 import 'package:image_picker/image_picker.dart';
@@ -24,14 +26,14 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
   int totalcost;
   int count = 0;
   bool inprogress = false;
-  List<TravelDoc> list;
+  List<TripExpense> list;
 
   Future get ff => null;
 
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-    var textTheme = theme.textTheme;
-    var followerStyle = textTheme.subhead.copyWith(color: Colors.black);
+   // var theme = Theme.of(context);
+    //var textTheme = theme.textTheme;
+    //var followerStyle = textTheme.subhead.copyWith(color: Colors.black);
 
     return Scaffold(
       appBar: AppBar(
@@ -71,29 +73,25 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
     );
   }
 
-  StreamBuilder<QuerySnapshot> _retrieveUsers() {
-    return new StreamBuilder<QuerySnapshot>(
-        stream: Firestore.instance
-            .document('/users/User1/Trips/${widget.tripId}')
-            .collection('TropDocs')
-            .snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+  StreamBuilder _retrieveUsers() {
+    return new StreamBuilder(
+        stream:getTripDocsStream(1,widget.tripId),
+        builder: (context,  snapshot) {
           if (!snapshot.hasData || snapshot.data == null) {
-            print("retrieve users do not have data.");
-            return Container();
+            return const Text("Loading....");
           }
           return ListView.builder(
-              itemCount: snapshot.data.documents.length,
+              itemCount: snapshot.data.length,
               itemBuilder: (context, index) {
-                final DocumentSnapshot userDoc = snapshot.data.documents[index];
+                final TripExpense userDoc = snapshot.data.elementAt(index);
                 return Dismissible(
-                    key: new Key(userDoc.documentID.toString()),
+                    key: new Key(userDoc.id.toString()),
                     direction: DismissDirection.horizontal,
                     onDismissed: (DismissDirection direction) {
                       Firestore.instance
                           .document('/users/User1/Trips/${widget.tripId}')
                           .collection('TropDocs')
-                          .document(userDoc.documentID)
+                          .document(userDoc.id)
                           .delete();
                     },
                     background: Container(
@@ -106,12 +104,12 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                       ),
                     ),
                     child: _buildlistitem(
-                        context, snapshot.data.documents[index]));
+                        context, snapshot.data.elementAt(index)));
               });
         });
   }
 
-  _buildlistitem(BuildContext context, DocumentSnapshot document) {
+  _buildlistitem(BuildContext context, TripExpense document) {
     return Card(
         elevation: 1.7,
         child: new Container(
@@ -119,7 +117,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
         ));
   }
 
-  Widget planetThumbnail(BuildContext context, DocumentSnapshot document) {
+  Widget planetThumbnail(BuildContext context, TripExpense document) {
     return new Container(
       margin: new EdgeInsets.symmetric(vertical: 16.0),
       alignment: FractionalOffset.centerLeft,
@@ -133,7 +131,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                 return Container(
                     child: PhotoView(
                   imageProvider: NetworkImage(
-                    document['FilePath'],
+                    document.filePath,
                   ),
                 ));
               });
@@ -142,7 +140,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
     );
   }
 
-  Widget cardRowDecor(BuildContext context, DocumentSnapshot document) {
+  Widget cardRowDecor(BuildContext context, TripExpense document) {
     return new Container(
         // height: 180.0,
         margin: const EdgeInsets.symmetric(
@@ -164,13 +162,13 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
     });
   }
 
-  Widget travelDocCard(BuildContext context, DocumentSnapshot document) {
+  Widget travelDocCard(BuildContext context, TripExpense document) {
     return new Container(
       child: Column(
         children: <Widget>[
           ListTile(
             title: Text(
-              document['ExpenseCategory'],
+              document.expenseCategory,
               style: TextStyle(color: Colors.white.withOpacity(1.0)),
             ),
           ),
@@ -187,7 +185,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                   new Padding(
                     padding: new EdgeInsets.all(7.0),
                     child: new Text(
-                      document['Paymnet Method'],
+                      document.paymnetMethod,
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -199,7 +197,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                   ),
                   new Padding(
                     padding: new EdgeInsets.all(7.0),
-                    child: new Text(document['Amount'],
+                    child: new Text(document.amount,
                         style: TextStyle(
                           color: Colors.white,
                         )),
@@ -213,7 +211,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                   new Padding(
                       padding: new EdgeInsets.all(7.0),
                       child: new Text(
-                        document['Date'],
+                         DateFormat.yMMMd().format(DateTime.parse(document.date)),
                         style: TextStyle(color: Colors.white),
                       ))
                 ],
@@ -237,33 +235,33 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
     );
   }
 
-  _calculatingtravelCost(TextStyle costStyle, String tripId) {
-    int cost = 0;
-    int kount = 0;
-    Firestore.instance
-        .collection("/users/User1/Trips/$tripId/TropDocs")
-        .snapshots()
-        .listen((snapshot) {
-      snapshot.documents.forEach((doc) {
-        cost = (cost + int.parse(doc.data["Amount"]));
-        kount = kount + 1;
-        setState(() {
-          totalcost = cost;
-          count = kount;
-        });
-      });
-    });
+  // _calculatingtravelCost(TextStyle costStyle, String tripId) {
+  //   int cost = 0;
+  //   int kount = 0;
+  //   Firestore.instance
+  //       .collection("/users/User1/Trips/$tripId/TropDocs")
+  //       .snapshots()
+  //       .listen((snapshot) {
+  //     snapshot.documents.forEach((doc) {
+  //       cost = (cost + int.parse(doc.data["Amount"]));
+  //       kount = kount + 1;
+  //       setState(() {
+  //         totalcost = cost;
+  //         count = kount;
+  //       });
+  //     });
+  //   });
 
-    return (<Widget>[
-      new Text('Totalcost $totalcost', style: costStyle),
-      new Text(
-        ' | ',
-        style:
-            costStyle.copyWith(fontSize: 24.0, fontWeight: FontWeight.normal),
-      ),
-      new Text('No of Documnet $count ', style: costStyle),
-    ]);
-  }
+  //   return (<Widget>[
+  //     new Text('Totalcost $totalcost', style: costStyle),
+  //     new Text(
+  //       ' | ',
+  //       style:
+  //           costStyle.copyWith(fontSize: 24.0, fontWeight: FontWeight.normal),
+  //     ),
+  //     new Text('No of Documnet $count ', style: costStyle),
+  //   ]);
+  // }
 
   _pepairingCSVData(String tripId) async {
     String intialdata =
