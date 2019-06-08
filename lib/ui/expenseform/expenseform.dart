@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:kclaim/DBandService/APIServices.dart';
 import 'package:kclaim/Model/TripExpense.dart';
-import 'package:kclaim/ui/tripdocumnet/tripdocs.dart';
 
 class Expenseform extends StatefulWidget {
   final String tripId;
@@ -69,10 +68,9 @@ class _ExpensePage extends State<Expenseform> {
           title: Text('Expense details'),
         ),
         body: new Center(
-          child: !submitting
-              ? expenceformUI()
-              : const Center(child: const CircularProgressIndicator()),
-        ));
+            child: submitting
+                ? const Center(child: const CircularProgressIndicator())
+                : expenceformUI()));
   }
 
   Widget expenceformUI() {
@@ -244,57 +242,44 @@ class _ExpensePage extends State<Expenseform> {
       child: new MaterialButton(
         minWidth: 100.0,
         onPressed: () async {
-          _uploadFileToFireStore();
-          Navigator.pop(
-            context,
-            MaterialPageRoute(builder: (context) => MyTripDocWidget()),
-          );
+          toggleSubmitState();
+          final result = await _uploadFileToFireStore();
+          toggleSubmitState();
+          if (result == true) {
+            Navigator.pop(context, "true");
+          } else {
+            // to do show error result
+          }
         },
         child: new Text(text),
       ),
     );
   }
 
-  _uploadFileToFireStore() async {
-    toggleSubmitState();
+  Future<bool> _uploadFileToFireStore() async {
+    try {
+      bool isSuccess = false;
+      TripExpense tripExpense = new TripExpense();
+      tripExpense.tripId = widget.tripId;
+      tripExpense.amount = txtAmountController.text;
+      tripExpense.currency = txtAmountController.text;
+      tripExpense.date =
+          DateFormat('yyyy-MM-dd').format(selectedDate).toString();
+      tripExpense.description = txtDescriptionController.text;
+      tripExpense.devicePhysicalPath = sampleImage.path;
+      tripExpense.expenseCategory = _expenceType;
+      tripExpense.filePath = "";
+      tripExpense.receiptNo = txtReceiptNoController.text;
+      tripExpense.paymnetMethod = paymentmethodType;
 
-    // final StorageReference ref =
-    //     FirebaseStorage.instance.ref().child('$documentFilename');
-    // final StorageUploadTask uploadTask = ref.putFile(sampleImage);
-
-    // final downloadURL =
-    //     await (await uploadTask.onComplete).ref.getDownloadURL();
-
-    // if (uploadTask.isComplete) {
-    //   DocumentReference reference =
-    //       Firestore.instance.document('users/User1/Trips/${widget.tripId}');
-
-    //   await reference.collection('TropDocs').add({
-    //     "Date": DateFormat('yyyy-MM-dd').format(selectedDate).toString(),
-    //     "FilePath": downloadURL,
-    //     "ExpenseCategory": _expenceType,
-    //     "DevicePhysicalPath": sampleImage.path,
-    //     "Amount": txtAmountController.text,
-    //     "Paymnet Method": paymentmethodType,
-    //     "Currency": txtCurrencyController.text,
-    //     "Description": txtDescriptionController.text,
-    //     "Receipt No": txtReceiptNoController.text,
-    //   });
-    //   toggleSubmitState();
-    // }
-
-    TripExpense te = new TripExpense();
-    te.tripId = widget.tripId;
-    te.amount = txtAmountController.text;
-    te.currency = txtAmountController.text;
-    te.date = DateFormat('yyyy-MM-dd').format(selectedDate).toString();
-    te.description = txtDescriptionController.text;
-    te.devicePhysicalPath = sampleImage.path;
-    te.filePath = "";
-    te.receiptNo = txtReceiptNoController.text;
-    te.paymnetMethod = paymentmethodType;
-
-    addTripDoc(te, 1);
+      final result = await addTripDoc(tripExpense, 1);
+      if (result == 'Success') {
+        isSuccess = true;
+      }
+      return isSuccess;
+    } catch (ex) {
+      return false;
+    }
   }
 
   Widget enableUpload() {

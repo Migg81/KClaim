@@ -14,8 +14,6 @@ environment:
 
 dependencies:
 
-  cloud_firestore:
-  firebase_storage:
   path_provider:
   image_picker:
   url_launcher:

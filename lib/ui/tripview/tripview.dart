@@ -35,7 +35,9 @@ class _TripScreenState extends State<TripScreen> {
           child: StreamBuilder(
         stream: getTrips(1),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Text("Loading....");
+          if (!snapshot.hasData) {
+            return const Center(child: const CircularProgressIndicator());
+          }
           return ListView.builder(
             itemExtent: 130.0,
             itemCount: snapshot.data.length,

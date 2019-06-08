@@ -98,13 +98,12 @@ Future<String> addTripDoc(TripExpense traveldoc, userId) async {
             'Receipt_Number':traveldoc.receiptNo,
             'Trip_Id':traveldoc.tripId
             }));
-    // var result = jsonDecode(response.body);
+            
     if (response.statusCode == 200) {
       return "Success";
     }
   } catch (e) {
     return "Network timeout";
   }
-
   return "Success";
 }
