@@ -33,7 +33,7 @@ class _ExpensePage extends State<Expenseform> {
   String _expenceType = '';
   String documentFilename;
   DateTime selectedDate = new DateTime.now();
-  File sampleImage;
+  File uploadImageFile;
   String paymentmethodType = "";
   bool submitting = false;
 
@@ -67,10 +67,19 @@ class _ExpensePage extends State<Expenseform> {
         appBar: new AppBar(
           title: Text('Expense details'),
         ),
-        body: new Center(
-            child: submitting
-                ? const Center(child: const CircularProgressIndicator())
-                : expenceformUI()));
+        body: Stack(
+          children: <Widget>[
+            expenceformUI(),
+            submitting
+                ? Container(
+                    color: Colors.black.withOpacity(0.5),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                : Container()
+          ],
+        ));
   }
 
   Widget expenceformUI() {
@@ -199,7 +208,7 @@ class _ExpensePage extends State<Expenseform> {
                     },
                     child: Container(
                       child: new InputDecorator(
-                        child: (sampleImage == null
+                        child: (uploadImageFile == null
                             ? Text("Upload file")
                             : Text("$documentFilename")),
                         decoration: const InputDecoration(
@@ -258,6 +267,8 @@ class _ExpensePage extends State<Expenseform> {
 
   Future<bool> _uploadFileToFireStore() async {
     try {
+      var respocedata = await uploadTripRealtedFile(uploadImageFile);
+
       bool isSuccess = false;
       TripExpense tripExpense = new TripExpense();
       tripExpense.tripId = widget.tripId;
@@ -266,7 +277,7 @@ class _ExpensePage extends State<Expenseform> {
       tripExpense.date =
           DateFormat('yyyy-MM-dd').format(selectedDate).toString();
       tripExpense.description = txtDescriptionController.text;
-      tripExpense.devicePhysicalPath = sampleImage.path;
+      tripExpense.devicePhysicalPath = uploadImageFile.path;
       tripExpense.expenseCategory = _expenceType;
       tripExpense.filePath = "";
       tripExpense.receiptNo = txtReceiptNoController.text;
@@ -319,20 +330,20 @@ class _ExpensePage extends State<Expenseform> {
   Future getImage() async {
     var tempImage = await ImagePicker.pickImage(source: ImageSource.gallery);
     setState(() {
-      sampleImage = tempImage;
+      uploadImageFile = tempImage;
     });
 
-    documentFilename = sampleImage.path.substring(
-        sampleImage.path.lastIndexOf("/") + 1, sampleImage.path.length);
+    documentFilename = uploadImageFile.path.substring(
+        uploadImageFile.path.lastIndexOf("/") + 1, uploadImageFile.path.length);
   }
 
   Future getImagefromCamera() async {
     var tempImage = await ImagePicker.pickImage(source: ImageSource.camera);
     setState(() {
-      sampleImage = tempImage;
+      uploadImageFile = tempImage;
     });
 
-    documentFilename = sampleImage.path.substring(
-        sampleImage.path.lastIndexOf("/") + 1, sampleImage.path.length);
+    documentFilename = uploadImageFile.path.substring(
+        uploadImageFile.path.lastIndexOf("/") + 1, uploadImageFile.path.length);
   }
 }

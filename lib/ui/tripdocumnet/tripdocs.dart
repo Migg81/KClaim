@@ -47,6 +47,10 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
               });
               await _pepairingCSVData('${widget.tripId}');
               await _uploadCSVToFireStore();
+
+              setState(() {
+                inprogress = false;
+              });
             }),
           ),
         ],
@@ -90,11 +94,8 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
                     key: new Key(userDoc.id.toString()),
                     direction: DismissDirection.horizontal,
                     onDismissed: (DismissDirection direction) {
-                      // Firestore.instance
-                      //     .document('/users/User1/Trips/${widget.tripId}')
-                      //     .collection('TropDocs')
-                      //     .document(userDoc.id)
-                      //     .delete();
+                      deleteTripDoc(
+                          int.parse(userDoc.id), int.parse(widget.tripId), 1);
                     },
                     background: Container(
                       alignment: AlignmentDirectional.centerEnd,
@@ -267,50 +268,48 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
   // }
 
   _pepairingCSVData(String tripId) async {
-    // String intialdata =
-    //     'Date,Expense Category,Travel Location,Expense Nature,Account,Description,Receipt No,' +
-    //         'Cost Centre,Currency,Foreign Currency Amount,FX Rates,Local Currency Amount,Corporate Card,Remarks' +
-    //         '\r\n';
-    // //await _creteLocalocalFile(data, 'START');
-    // String data;
-    // Firestore.instance
-    //     .collection("/users/User1/Trips/$tripId/TropDocs")
-    //     .snapshots()
-    //     .listen((snapshot) {
-    //   snapshot.documents.forEach((doc) async {
-    //     //cost = (cost + int.parse(doc.data["Amount"]));
-    //     data = doc.data["Date"] +
-    //         ',' +
-    //         doc.data["ExpenseCategory"] +
-    //         ',' +
-    //         '' +
-    //         ',' +
-    //         doc.data["ExpenseCategory"] +
-    //         '' +
-    //         ',' +
-    //         '' +
-    //         ',' +
-    //         doc.data["Description"] +
-    //         ',' +
-    //         doc.data["Receipt No"] +
-    //         ',' +
-    //         '' +
-    //         ',' +
-    //         '' +
-    //         ',' +
-    //         doc.data["Currency"] +
-    //         ',' +
-    //         '' +
-    //         ',' +
-    //         '' +
-    //         ',' +
-    //         '';
+    String intialdata =
+        'Date,Expense Category,Travel Location,Expense Nature,Account,Description,Receipt No,' +
+            'Cost Centre,Currency,Foreign Currency Amount,FX Rates,Local Currency Amount,Corporate Card,Remarks' +
+            '\r\n';
+    //Instead of calling getTripDocsStream try to use the avilable data.
+    userTrips = getTripDocsStream(1, widget.tripId);
+    String data;
+    userTrips.listen((snapshot) {
+      snapshot.forEach((doc) async {
+        //cost = (cost + int.parse(doc.data["Amount"]));
+        data = doc.date +
+            ',' +
+            doc.expenseCategory +
+            ',' +
+            '' +
+            ',' +
+            doc.expenseCategory +
+            '' +
+            ',' +
+            '' +
+            ',' +
+            doc.description +
+            ',' +
+            doc.receiptNo +
+            ',' +
+            '' +
+            ',' +
+            '' +
+            ',' +
+            doc.currency +
+            ',' +
+            '' +
+            ',' +
+            '' +
+            ',' +
+            '';
 
-    //     data = data + '\r\n';
-    //  });
-    // }).onDone(() {
-    //   _creteLocalocalFile('\r\n' + intialdata + data, 'APPEND');
-    // });
+        data = data + '\r\n';
+      });
+    }).onDone(() {
+      _creteLocalocalFile('\r\n' + intialdata + data, 'APPEND');
+    });
   }
 
 // _creteLocalocalFile('\r\n' + intialdata + data, 'APPEND');
