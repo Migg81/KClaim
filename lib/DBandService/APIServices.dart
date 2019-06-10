@@ -3,10 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:async/async.dart';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 import 'package:kclaim/Model/Trip.dart';
 import 'package:kclaim/Model/TripExpense.dart';
-import 'package:dio/dio.dart';
 import 'package:path/path.dart';
 
 Future<List<Trip>> getTripsforUser(userId) async {
@@ -33,8 +31,36 @@ Future<List<Trip>> getTripsforUser(userId) async {
   }
 }
 
+Future<List<Trip>> getTripsforUserOlderthensixmonth(userId) async {
+  var apiURL =
+      'https://hlm4mxc8wk.execute-api.ap-southeast-2.amazonaws.com/dev/users/$userId/trips?getpasttrips=true';
+
+  try {
+    final response = await http.get(apiURL);
+
+    if (response.statusCode == 200) {
+      // If the call to the server was successful, parse the JSON
+      final items1 = json.decode(response.body);
+
+      var list = items1['data'] as List;
+      List<Trip> itemsList = list.map((i) => Trip.fromJSON(i)).toList();
+
+      return itemsList;
+    } else {
+      // If that call was not successful, throw an error.
+      throw Exception('Failed to load post');
+    }
+  } catch (e) {
+    throw Exception('Network timeout');
+  }
+}
+
 Stream<List<Trip>> getTrips(userId) {
   return Stream.fromFuture(getTripsforUser(userId));
+}
+
+Stream<List<Trip>> getPastTrips(userId) {
+  return Stream.fromFuture(getTripsforUserOlderthensixmonth(userId));
 }
 
 Future<List<TripExpense>> getTripDocs(userId, tripId) async {

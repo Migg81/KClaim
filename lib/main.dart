@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kclaim/bottom_sheet_fix.dart';
+import 'package:kclaim/ui/pastTripRecord/tripview.dart';
 import 'package:kclaim/ui/starttripdialog/starttrip.dart';
 import 'package:kclaim/ui/tripview/tripview.dart';
 
@@ -47,16 +48,15 @@ class MyApp extends StatelessWidget {
                 Tab(text: "PAST",icon: Icon(Icons.history)),
               ],
             ),
-            //title: Text('Tabs Demo'),
           ),
           body: TabBarView(
             children: [
               TripScreen(),
-              Icon(Icons.directions_transit),
+              PasrTripRecord(),
             ],
           ),
         ),
-      ),//TripScreen(), //(title: 'Kmart buisness trip claim.'),
+      ),
     );
   }
 }

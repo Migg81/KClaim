@@ -21,16 +21,14 @@ class _ExpensePage extends State<Expenseform> {
   final txtDescriptionController = TextEditingController();
   final txtReceiptNoController = TextEditingController();
   final txtCurrencyController = TextEditingController();
-
   List<String> _expenceTypes = <String>[
-    '',
     'Miscellaneous',
     'Breakfast',
     'Lunch',
     'Dinner',
     'Food'
   ];
-  String _expenceType = '';
+  String _expenceType = 'Miscellaneous';
   String documentFilename;
   DateTime selectedDate = new DateTime.now();
   File uploadImageFile;
@@ -100,8 +98,8 @@ class _ExpensePage extends State<Expenseform> {
                         labelText: 'Expense Category',
                       ),
                       isEmpty: _expenceType == '',
-                      child: new DropdownButtonHideUnderline(
-                        child: new DropdownButton(
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
                           value: _expenceType,
                           //style: TextStyle(color: Colors.black),
                           isDense: true,
@@ -111,10 +109,11 @@ class _ExpensePage extends State<Expenseform> {
                               state.didChange(newValue);
                             });
                           },
-                          items: _expenceTypes.map((String value) {
-                            return new DropdownMenuItem(
+                          items: _expenceTypes
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
                               value: value,
-                              child: new Text(
+                              child: Text(
                                 value,
                                 style: TextStyle(color: Colors.black),
                               ),

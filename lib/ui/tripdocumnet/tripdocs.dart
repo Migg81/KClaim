@@ -28,7 +28,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
   @override
   void initState() {
     setState(() {
-      userTrips = getTripDocsStream(1, widget.tripId);
+      this.userTrips = getTripDocsStream(1, widget.tripId);
     });
     super.initState();
   }
@@ -67,12 +67,11 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
             MaterialPageRoute(
                 builder: (context) => Expenseform(tripId: '${widget.tripId}')),
           );
-
           if (result == "true") {
             refreshList();
           }
         }),
-        tooltip: 'Increment Counter',
+        tooltip: 'Add documnet',
         child: Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -273,9 +272,9 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
             'Cost Centre,Currency,Foreign Currency Amount,FX Rates,Local Currency Amount,Corporate Card,Remarks' +
             '\r\n';
     //Instead of calling getTripDocsStream try to use the avilable data.
-    userTrips = getTripDocsStream(1, widget.tripId);
+    //userTrips = getTripDocsStream(1, widget.tripId);
     String data;
-    userTrips.listen((snapshot) {
+    this.userTrips.listen((snapshot) {
       snapshot.forEach((doc) async {
         //cost = (cost + int.parse(doc.data["Amount"]));
         data = doc.date +
@@ -365,7 +364,7 @@ class _MyTripDocWidgettState extends State<MyTripDocWidget> {
 
   void refreshList() {
     setState(() {
-      userTrips = getTripDocsStream(1, widget.tripId);
+      this.userTrips = getTripDocsStream(1, widget.tripId);
     });
   }
 }
