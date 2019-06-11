@@ -64,7 +64,7 @@ class HomeCardnEditTrip extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => TripScreen()),
+                        MaterialPageRoute(builder: (context) => TripScreen(isShowingPastTrip: false,)),
                       );
                     },
                   ),

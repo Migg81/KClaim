@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:kclaim/bottom_sheet_fix.dart';
-import 'package:kclaim/ui/pastTripRecord/tripview.dart';
 import 'package:kclaim/ui/starttripdialog/starttrip.dart';
 import 'package:kclaim/ui/tripview/tripview.dart';
 
@@ -51,8 +50,8 @@ class MyApp extends StatelessWidget {
           ),
           body: TabBarView(
             children: [
-              TripScreen(),
-              PasrTripRecord(),
+              TripScreen(isShowingPastTrip: false),
+              TripScreen(isShowingPastTrip: true,),
             ],
           ),
         ),

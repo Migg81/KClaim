@@ -43,7 +43,7 @@ class AddNewTripDialogState extends State<TripDialog> {
 
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => TripScreen()),
+            MaterialPageRoute(builder: (context) => TripScreen(isShowingPastTrip: false,)),
           );
         },
         child: new Text(text),

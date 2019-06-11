@@ -7,10 +7,10 @@ import 'package:kclaim/ui/starttripdialog/starttrip.dart';
 import 'package:kclaim/ui/tripdocumnet/tripdocs.dart';
 
 class TripScreen extends StatefulWidget {
-  TripScreen({Key key, this.title}) : super(key: key);
+  TripScreen({Key key, this.title, this.isShowingPastTrip}) : super(key: key);
 
   final String title;
-
+  final bool isShowingPastTrip;
   @override
   _TripScreenState createState() => new _TripScreenState();
 }
@@ -26,14 +26,13 @@ class _TripScreenState extends State<TripScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text("Trips"),
       ),
       body: Center(
           child: StreamBuilder(
-        stream: getTrips(1),
+        stream: getTrips(widget.isShowingPastTrip,1),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: const CircularProgressIndicator());
@@ -135,8 +134,9 @@ class _TripScreenState extends State<TripScreen> {
                   document.tripName,
                   style: TextStyle(color: Colors.white.withOpacity(1.0)),
                 ),
-                 Text(new DateFormat.yMMMd().format(DateTime.parse(document.date)))
-               // Text(document.date)
+                Text(new DateFormat.yMMMd()
+                    .format(DateTime.parse(document.date)))
+                // Text(document.date)
               ],
             )),
             ButtonTheme.bar(
@@ -155,8 +155,8 @@ class _TripScreenState extends State<TripScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                MyTripDocWidget(tripId: document.id.toString())),
+                            builder: (context) => MyTripDocWidget(
+                                tripId: document.id.toString())),
                       );
                     },
                   ),
